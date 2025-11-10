@@ -9,13 +9,13 @@ namespace CoolLibrary.API.Controllers;
 
 /// <summary>
 /// Loan operations management
-/// All endpoints require JWT authentication
+/// Accessible to authenticated users with User or Admin role
 /// </summary>
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]  // ← Versioned route
 [Produces("application/json")]
 [Tags("🔄 Operations - Loans")]
-[Authorize]  // JWT token required for all endpoints
+[Authorize(Roles = "User,Admin")]  // ← Both User and Admin can access
 [ApiVersion("1.0")]  // ← This controller belongs to API v1.0
 public class LoansController : ControllerBase
 {
@@ -65,7 +65,7 @@ public class LoansController : ControllerBase
     /// <response code="200">Loan created successfully</response>
     /// <response code="400">Invalid request (book unavailable, customer doesn't exist, borrowing limit reached, etc.)</response>
     /// <response code="500">Internal server error occurred</response>
-    [HttpPost]
+    [HttpPost("RequestLoan")]
     [ProducesResponseType(typeof(LoanResponseDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

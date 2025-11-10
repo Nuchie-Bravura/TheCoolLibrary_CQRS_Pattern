@@ -16,7 +16,7 @@ namespace CoolLibrary.API.Controllers;
 [Route("api/v{version:apiVersion}/[controller]")]  // ← Versioned route
 [Produces("application/json")]
 [Tags("👥 Management - Customers")]
-[Authorize]  // JWT token required for all endpoints in this controller
+[Authorize(Roles = "Admin")] // JWT token required for all endpoints in this controller and only visible to Admin role
 [ApiVersion("1.0")]  // ← This controller belongs to API v1.0
 public class CustomersController : ControllerBase
 {

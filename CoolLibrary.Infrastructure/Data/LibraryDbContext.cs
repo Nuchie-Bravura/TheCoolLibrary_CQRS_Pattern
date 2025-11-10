@@ -8,8 +8,9 @@ namespace CoolLibrary.Infrastructure.Data;
 
 /// <summary>
 /// Entity Framework DbContext for the Library Management System
+/// Uses ApplicationUser instead of IdentityUser for custom user properties
 /// </summary>
-public class LibraryDbContext : IdentityDbContext
+public class LibraryDbContext : IdentityDbContext<ApplicationUser>
 {
     public LibraryDbContext(DbContextOptions<LibraryDbContext> options) : base(options)
     {
@@ -31,6 +32,7 @@ public class LibraryDbContext : IdentityDbContext
         base.OnModelCreating(modelBuilder);
 
         // Apply all entity configurations
+        modelBuilder.ApplyConfiguration(new ApplicationUserConfiguration());  // ? NEW
         modelBuilder.ApplyConfiguration(new AuthorConfiguration());
         modelBuilder.ApplyConfiguration(new GenreConfiguration());
         modelBuilder.ApplyConfiguration(new BookConfiguration());
@@ -877,42 +879,6 @@ public class LibraryDbContext : IdentityDbContext
             }
         );
 
-        // Seed Customers
-        modelBuilder.Entity<Customer>().HasData(
-            new Customer
-            {
-                CustomerId = 1,
-                FirstName = "John",
-                LastName = "Smith",
-                Email = "john.smith@email.com",
-                Phone = "+1-555-0101",
-                Address = "123 Main Street",
-                City = "New York",
-                PostalCode = "10001",
-                MembershipDate = baseDate.AddMonths(-6),
-                MembershipStatus = MembershipStatus.Active,
-                MaxBooksAllowed = 5,
-                CreatedAt = baseDate,
-                UpdatedAt = baseDate
-            },
-            new Customer
-            {
-                CustomerId = 2,
-                FirstName = "Emily",
-                LastName = "Johnson",
-                Email = "emily.johnson@email.com",
-                Phone = "+1-555-0102",
-                Address = "456 Oak Avenue",
-                City = "Los Angeles",
-                PostalCode = "90210",
-                MembershipDate = baseDate.AddMonths(-3),
-                MembershipStatus = MembershipStatus.Active,
-                MaxBooksAllowed = 3,
-                CreatedAt = baseDate,
-                UpdatedAt = baseDate
-            }
-        );
-
         // Seed Book-Author relationships
         modelBuilder.Entity<BookAuthor>().HasData(
             new BookAuthor { BookId = 1, AuthorId = 1, AuthorOrder = 1 }, // 1984 by George Orwell
@@ -1026,6 +992,9 @@ public class LibraryDbContext : IdentityDbContext
             new BookGenre { BookId = 35, GenreId = 2 }, // Prince Caspian - Fantasy
             new BookGenre { BookId = 35, GenreId = 3 }  // Prince Caspian - Classic
         );
+
+        // NOTE: Customer seeding removed - now done in DatabaseSeeder
+        // Customers are created with their associated ApplicationUser accounts
     }
 
     /// <summary>

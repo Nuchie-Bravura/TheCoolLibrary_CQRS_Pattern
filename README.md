@@ -35,14 +35,14 @@ This solution follows the Clean Architecture pattern with clear separation of co
 - Update the connection string in `appsettings.json`
 
 4. **Azzure KeyVault Configuration (Local)**
--dotnet user-secrets init --project CoolLibrary.API for locally having Key--Jwt
+- dotnet user-secrets init --project CoolLibrary.API for locally having Key--Jwt
 - dotnet user-secrets set "Jwt:Key" "your-secret-key-value" --project CoolLibrary.API
 
 
 5. **Apply database migrations**
  package nugget console update-database 
 
-56 **Run the application**
+6 **Run the application**
 
 
 7. **Access Swagger UI**

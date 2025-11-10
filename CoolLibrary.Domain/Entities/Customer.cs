@@ -4,6 +4,8 @@ namespace CoolLibrary.Domain.Entities;
 
 /// <summary>
 /// Represents a library customer/member
+/// Links to ApplicationUser (Identity) via UserId foreign key
+/// Separation: ApplicationUser handles authentication, Customer handles library business logic
 /// </summary>
 public class Customer
 {
@@ -11,24 +13,24 @@ public class Customer
     /// Unique identifier for the customer
     /// </summary>
     public int CustomerId { get; set; }
-    
+
     /// <summary>
-    /// Customer's first name
+    /// Foreign key to ApplicationUser (AspNetUsers table)
+    /// Links this customer to their authentication account
     /// </summary>
-    public string FirstName { get; set; } = string.Empty;
-    
+    public string UserId { get; set; } = string.Empty;
+
     /// <summary>
-    /// Customer's last name
+    /// Navigation property to ApplicationUser
+    /// Use this to access user's email, name, roles, etc.
     /// </summary>
-    public string LastName { get; set; } = string.Empty;
-    
+    public virtual ApplicationUser User { get; set; } = null!;
+
+    // NOTE: FirstName, LastName, and Email are now in ApplicationUser
+    // Access them via: customer.User.FirstName, customer.User.LastName, customer.User.Email
+
     /// <summary>
-    /// Customer's email address
-    /// </summary>
-    public string Email { get; set; } = string.Empty;
-    
-    /// <summary>
-    /// Customer's phone number
+    /// Customer's phone number (library-specific contact)
     /// </summary>
     public string? Phone { get; set; }
     
@@ -89,10 +91,17 @@ public class Customer
     /// </summary>
     public virtual ICollection<Fine> Fines { get; set; } = new List<Fine>();
     
+    // Computed properties
+    
     /// <summary>
-    /// Full name property for convenience
+    /// Full name property (delegates to ApplicationUser)
     /// </summary>
-    public string FullName => $"{FirstName} {LastName}".Trim();
+    public string FullName => User?.FullName ?? string.Empty;
+
+    /// <summary>
+    /// Email property (delegates to ApplicationUser)
+    /// </summary>
+    public string Email => User?.Email ?? string.Empty;
     
     /// <summary>
     /// Current number of active loans
