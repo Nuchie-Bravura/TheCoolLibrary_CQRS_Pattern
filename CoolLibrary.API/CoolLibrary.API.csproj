@@ -37,4 +37,8 @@
     <ProjectReference Include="..\CoolLibrary.Infrastructure\CoolLibrary.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+  </ItemGroup>
+
 </Project>

@@ -4,6 +4,7 @@ using Azure;
 using CoolLibrary.Application.Mappings;
 using CoolLibrary.Application.Services;
 using CoolLibrary.Domain.Contracts;
+using CoolLibrary.Domain.Entities;  // ← Add this for ApplicationUser
 using CoolLibrary.Infrastructure.Data;
 using CoolLibrary.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -96,8 +97,11 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddDbContext<LibraryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//EFCore Identity
-builder.Services.AddIdentityCore<IdentityUser>().AddRoles<IdentityRole>().AddEntityFrameworkStores<LibraryDbContext>().AddDefaultTokenProviders();
+//EFCore Identity - Using ApplicationUser instead of IdentityUser
+builder.Services.AddIdentityCore<ApplicationUser>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<LibraryDbContext>()
+    .AddDefaultTokenProviders();
 
 
 
@@ -105,7 +109,7 @@ builder.Services.AddIdentityCore<IdentityUser>().AddRoles<IdentityRole>().AddEnt
 builder.Services.AddScoped<IAuthors, AuthorsRepository>();
 builder.Services.AddScoped<IBooks, BooksRepository>();
 builder.Services.AddScoped<ICustomers, CustomersRepository>();
-builder.Services.AddScoped<ILoans, LoansRepository>();
+builder.Services.AddScoped<ILoans, LoansRepository>();  // ← Fixed typo
 
 // Application services
 builder.Services.AddScoped<LoanRequestService>();
@@ -177,6 +181,50 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+// SEED DATABASE WITH ROLES AND ADMIN USER
+// Using Infrastructure layer's DatabaseSeeder (Clean Architecture)
+Console.WriteLine("==============================================");
+Console.WriteLine("🌱 INITIALIZING DATABASE SEEDING...");
+Console.WriteLine("==============================================");
+
+try
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        
+        logger.LogInformation("Starting database seeding process...");
+        
+        await DatabaseSeeder.SeedAsync(services);
+        
+        logger.LogInformation("Database seeding completed successfully!");
+    }
+    
+    Console.WriteLine("==============================================");
+    Console.WriteLine("✅ DATABASE SEEDING SUCCESSFUL");
+    Console.WriteLine("==============================================");
+}
+catch (Exception ex)
+{
+    Console.WriteLine("==============================================");
+    Console.WriteLine("❌ DATABASE SEEDING FAILED!");
+    Console.WriteLine("==============================================");
+    Console.WriteLine($"Error: {ex.Message}");
+    Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+    
+    // Log using the application's logger
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "❌ Fatal error during database seeding");
+    
+    // You can choose to either:
+    // 1. Throw (stop the application from starting)
+    throw;
+    
+    // 2. Or continue (not recommended for production)
+    // Console.WriteLine("⚠️  Application will continue despite seeding failure");
+}
 
 // Get API version provider for Swagger UI
 var versionDescriptionProvider = app.Services.GetRequiredService<Asp.Versioning.ApiExplorer.IApiVersionDescriptionProvider>();

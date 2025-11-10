@@ -1,9 +1,13 @@
-﻿using CoolLibrary.Application.DTO;
+﻿using Asp.Versioning;
+using CoolLibrary.Application.DTO;
 using CoolLibrary.Application.Services;
+using CoolLibrary.Domain.Entities;
+using CoolLibrary.Domain.Enums;
+using CoolLibrary.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Asp.Versioning;
+using System.Security.Claims;
 
 namespace CoolLibrary.API.Controllers;
 
@@ -12,32 +16,29 @@ namespace CoolLibrary.API.Controllers;
 /// These endpoints are public (do not require authentication)
 /// </summary>
 [ApiController]
-[Route("api/v{version:apiVersion}/[controller]")]  // ← Versioned route
+[Route("api/v{version:apiVersion}/[controller]")]
 [Produces("application/json")]
 [Tags("🔐 Authentication")]
-[ApiVersion("1.0")]  // ← This controller belongs to API v1.0
+[ApiVersion("1.0")]
 public class AuthController : ControllerBase
 {
-    // UserManager: ASP.NET Core Identity service for managing users
-    // Provides methods like CreateAsync, FindByEmailAsync, CheckPasswordAsync
-    private readonly UserManager<IdentityUser> _userManager;
-
-    // TokenService: Our custom service to generate JWT tokens
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly TokenService _tokenService;
-
-    // Logger for tracking authentication events
+    private readonly LibraryDbContext _dbContext;  // ← Add DbContext to create Customer
     private readonly ILogger<AuthController> _logger;
 
     /// <summary>
     /// Constructor - Dependency Injection provides these services
     /// </summary>
     public AuthController(
-        UserManager<IdentityUser> userManager,
+        UserManager<ApplicationUser> userManager,
         TokenService tokenService,
+        LibraryDbContext dbContext,  // ← Inject DbContext
         ILogger<AuthController> logger)
     {
         _userManager = userManager;
         _tokenService = tokenService;
+        _dbContext = dbContext;
         _logger = logger;
     }
 
@@ -48,20 +49,30 @@ public class AuthController : ControllerBase
     /// Creates a new user in the system with the provided credentials.
     /// This endpoint is PUBLIC - no authentication required.
     /// 
+    /// **NOW ALSO CREATES A CUSTOMER PROFILE AUTOMATICALLY!**
+    /// 
     /// Request Sample:
     /// 
-    ///     POST /api/auth/register
+    ///     POST /api/v1/auth/register
     ///     {
+    ///         "firstName": "John",
+    ///         "lastName": "Doe",
     ///         "email": "john.doe@example.com",
     ///         "password": "MySecurePassword123!",
-    ///         "confirmPassword": "MySecurePassword123!"
+    ///         "confirmPassword": "MySecurePassword123!",
+    ///         "phone": "+1-555-0123",
+    ///         "address": "123 Main St",
+    ///         "city": "New York",
+    ///         "postalCode": "10001"
     ///     }
     /// 
     /// Success Response:
     /// 
     ///     {
-    ///         "message": "User registered successfully",
-    ///         "email": "john.doe@example.com"
+    ///         "message": "User and customer profile created successfully",
+    ///         "email": "john.doe@example.com",
+    ///         "customerId": 5,
+    ///         "role": "User"
     ///     }
     /// 
     /// </remarks>
@@ -71,13 +82,12 @@ public class AuthController : ControllerBase
     /// <response code="400">Invalid data or email already exists</response>
     /// <response code="500">Internal server error</response>
     [HttpPost("register")]
-    [AllowAnonymous]  // ← Public endpoint - no JWT required
+    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Register([FromBody] RegisterDTO registerDto)
     {
-        // Step 1: Validate model state (DataAnnotations in RegisterDTO)
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -85,41 +95,69 @@ public class AuthController : ControllerBase
 
         try
         {
-            // Step 2: Check if user already exists
+            // Step 1: Check if user already exists
             var existingUser = await _userManager.FindByEmailAsync(registerDto.Email);
             if (existingUser != null)
             {
                 return BadRequest(new { message = "User with this email already exists" });
             }
 
-            // Step 3: Create new IdentityUser
-            var newUser = new IdentityUser
+            // Step 2: Create new ApplicationUser with FirstName and LastName
+            var newUser = new ApplicationUser
             {
-                UserName = registerDto.Email,  // Username = Email
+                UserName = registerDto.Email,
                 Email = registerDto.Email,
-                EmailConfirmed = true  // In production, you'd send a confirmation email
+                EmailConfirmed = true,
+                FirstName = registerDto.FirstName,   // ← NEW
+                LastName = registerDto.LastName,     // ← NEW
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
-            // Step 4: Create user in database (password is automatically hashed by Identity)
+            // Step 3: Create user in database (password is automatically hashed)
             var result = await _userManager.CreateAsync(newUser, registerDto.Password);
 
-            // Step 5: Check if creation was successful
             if (!result.Succeeded)
             {
-                // If failed, return validation errors from Identity
                 var errors = result.Errors.Select(e => e.Description);
                 return BadRequest(new { message = "User registration failed", errors });
             }
 
-            // Step 6: Optionally assign default role (e.g., "User")
-            // await _userManager.AddToRoleAsync(newUser, "User");
+            // Step 4: Assign "User" role
+            var roleResult = await _userManager.AddToRoleAsync(newUser, "User");
+            
+            if (!roleResult.Succeeded)
+            {
+                _logger.LogWarning("Failed to assign User role to {Email}", registerDto.Email);
+            }
 
-            _logger.LogInformation("New user registered: {Email}", registerDto.Email);
+            // Step 5: Create Customer profile automatically! ✅
+            var customer = new Customer
+            {
+                UserId = newUser.Id,  // Link to ApplicationUser
+                Phone = registerDto.Phone,
+                Address = registerDto.Address,
+                City = registerDto.City,
+                PostalCode = registerDto.PostalCode,
+                MembershipDate = DateTime.UtcNow,
+                MembershipStatus = MembershipStatus.Active,
+                MaxBooksAllowed = 5,  // Default value
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _dbContext.Customers.Add(customer);
+            await _dbContext.SaveChangesAsync();
+
+            _logger.LogInformation("✅ New user and customer created: {Email} (Customer ID: {CustomerId})", 
+                registerDto.Email, customer.CustomerId);
 
             return Ok(new 
             { 
-                message = "User registered successfully",
-                email = newUser.Email 
+                message = "User and customer profile created successfully",
+                email = newUser.Email,
+                customerId = customer.CustomerId,  // ← Return customer ID
+                role = "User"
             });
         }
         catch (Exception ex)
@@ -219,4 +257,39 @@ public class AuthController : ControllerBase
             return StatusCode(500, new { message = "An error occurred during login" });
         }
     }
+
+    [HttpPost("renewToken")]
+    [Authorize] // ← token needed
+    [ProducesResponseType(typeof(AuthResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> RenewToken()
+    {
+        // het userId from current Token
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "Invalid token" });
+
+        // BD
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return Unauthorized(new { message = "User not found" });
+
+        // rol
+        var roles = await _userManager.GetRolesAsync(user);
+
+        // generate new token
+        var newToken = _tokenService.GenerateJwtToken(user, roles);
+        var expiresAt = _tokenService.GetTokenExpiration();
+
+        return Ok(new AuthResponseDTO
+        {
+            Token = newToken,
+            ExpiresAt = expiresAt,
+            Email = user.Email ?? "",
+            Roles = roles.ToList()
+        });
+    }
+
 }

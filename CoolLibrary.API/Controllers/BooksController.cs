@@ -9,13 +9,13 @@ namespace CoolLibrary.API.Controllers;
 
 /// <summary>
 /// Books catalog management
-/// All endpoints require JWT authentication
+/// Accessible to authenticated users with User or Admin role
 /// </summary>
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]  // ← Versioned route
 [Produces("application/json")]
 [Tags("📚 Catalog - Books")]
-[Authorize]  // JWT token required for all endpoints
+[Authorize(Roles = "User,Admin")]  // ← Both User and Admin can access
 [ApiVersion("1.0")]  // ← This controller belongs to API v1.0
 public class BooksController : ControllerBase
 {
@@ -54,7 +54,7 @@ public class BooksController : ControllerBase
     /// <returns>List of all books in the catalog</returns>
     /// <response code="200">Returns the list of books successfully</response>
     /// <response code="500">Internal server error occurred</response>
-    [HttpGet]
+    [HttpGet("ListBooks")]
     [ProducesResponseType(typeof(IEnumerable<BookDTO>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<BookDTO>>> GetAll()

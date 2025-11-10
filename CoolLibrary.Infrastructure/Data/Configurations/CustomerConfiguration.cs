@@ -7,6 +7,7 @@ namespace CoolLibrary.Infrastructure.Data.Configurations;
 
 /// <summary>
 /// Entity Framework configuration for Customer entity
+/// Configures Customer as a separate business entity linked to ApplicationUser
 /// </summary>
 public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 {
@@ -14,20 +15,15 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
     {
         // Primary key
         builder.HasKey(c => c.CustomerId);
+
+        // Foreign key to ApplicationUser
+        builder.Property(c => c.UserId)
+            .IsRequired()
+            .HasMaxLength(450);  // Standard length for AspNetUsers.Id
+
+        // NOTE: FirstName, LastName, and Email are now in ApplicationUser
+        // They are no longer configured here to avoid duplication
         
-        // Properties
-        builder.Property(c => c.FirstName)
-            .IsRequired()
-            .HasMaxLength(100);
-            
-        builder.Property(c => c.LastName)
-            .IsRequired()
-            .HasMaxLength(100);
-            
-        builder.Property(c => c.Email)
-            .IsRequired()
-            .HasMaxLength(200);
-            
         builder.Property(c => c.Phone)
             .HasMaxLength(20);
             
@@ -62,18 +58,23 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
             .HasDefaultValueSql("GETUTCDATE()");
         
         // Indexes
-        builder.HasIndex(c => c.Email)
-            .IsUnique()
-            .HasDatabaseName("IX_Customers_Email");
-            
-        builder.HasIndex(c => new { c.LastName, c.FirstName })
-            .HasDatabaseName("IX_Customers_Name");
+        builder.HasIndex(c => c.UserId)
+            .IsUnique()  // One customer per user
+            .HasDatabaseName("IX_Customers_UserId");
             
         builder.HasIndex(c => c.MembershipStatus)
             .HasDatabaseName("IX_Customers_MembershipStatus");
         
-        // Ignore computed properties
+        // Relationship with ApplicationUser (configured in ApplicationUserConfiguration)
+        // One-to-One: Customer.User -> ApplicationUser
+        builder.HasOne(c => c.User)
+            .WithOne(u => u.Customer)
+            .HasForeignKey<Customer>(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Ignore computed properties (not stored in database)
         builder.Ignore(c => c.FullName);
+        builder.Ignore(c => c.Email);
         builder.Ignore(c => c.CurrentLoanCount);
         builder.Ignore(c => c.CanBorrowMoreBooks);
         

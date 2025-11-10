@@ -4,6 +4,7 @@ using CoolLibrary.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CoolLibrary.Infrastructure.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    partial class LibraryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251110180418_init3")]
+    partial class init3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -154,7 +157,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                     b.HasIndex("LastName", "FirstName")
                         .HasDatabaseName("IX_Authors_Name");
 
-                    b.ToTable("Authors", (string)null);
+                    b.ToTable("Authors");
 
                     b.HasData(
                         new
@@ -450,7 +453,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                     b.HasIndex("Title")
                         .HasDatabaseName("IX_Books_Title");
 
-                    b.ToTable("Books", null, t =>
+                    b.ToTable("Books", t =>
                         {
                             t.HasCheckConstraint("CK_Books_CopyCount", "[AvailableCopies] <= [TotalCopies]");
 
@@ -1009,7 +1012,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                     b.HasIndex("BookId", "AuthorOrder")
                         .HasDatabaseName("IX_BookAuthors_BookId_AuthorOrder");
 
-                    b.ToTable("BookAuthors", null, t =>
+                    b.ToTable("BookAuthors", t =>
                         {
                             t.HasCheckConstraint("CK_BookAuthors_AuthorOrder", "[AuthorOrder] > 0");
                         });
@@ -1243,7 +1246,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                     b.HasIndex("GenreId")
                         .HasDatabaseName("IX_BookGenres_GenreId");
 
-                    b.ToTable("BookGenres", (string)null);
+                    b.ToTable("BookGenres");
 
                     b.HasData(
                         new
@@ -1656,7 +1659,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Customers_UserId");
 
-                    b.ToTable("Customers", null, t =>
+                    b.ToTable("Customers", t =>
                         {
                             t.HasCheckConstraint("CK_Customers_MaxBooksAllowed", "[MaxBooksAllowed] > 0");
                         });
@@ -1722,7 +1725,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                     b.HasIndex("Status", "CustomerId")
                         .HasDatabaseName("IX_Fines_Status_CustomerId");
 
-                    b.ToTable("Fines", null, t =>
+                    b.ToTable("Fines", t =>
                         {
                             t.HasCheckConstraint("CK_Fines_Amount", "[Amount] > 0");
 
@@ -1763,7 +1766,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Genres_Name");
 
-                    b.ToTable("Genres", (string)null);
+                    b.ToTable("Genres");
 
                     b.HasData(
                         new
@@ -1899,7 +1902,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                     b.HasIndex("Status", "DueDate")
                         .HasDatabaseName("IX_Loans_Status_DueDate");
 
-                    b.ToTable("Loans", null, t =>
+                    b.ToTable("Loans", t =>
                         {
                             t.HasCheckConstraint("CK_Loans_LateFee", "[LateFee] >= 0");
 
@@ -1963,7 +1966,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                     b.HasIndex("Status", "ExpirationDate")
                         .HasDatabaseName("IX_Reservations_Status_ExpirationDate");
 
-                    b.ToTable("Reservations", null, t =>
+                    b.ToTable("Reservations", t =>
                         {
                             t.HasCheckConstraint("CK_Reservations_ExpirationDate", "[ExpirationDate] >= [ReservationDate]");
                         });

@@ -9,13 +9,13 @@ namespace CoolLibrary.API.Controllers;
 
 /// <summary>
 /// Authors catalog management
-/// All endpoints require JWT authentication
+/// Accessible to authenticated users with User or Admin role
 /// </summary>
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]  // ← Versioned route
 [Produces("application/json")]
 [Tags("✍️ Catalog - Authors")]
-[Authorize]  // JWT token required for all endpoints
+[Authorize(Roles = "User,Admin")]  // ← Both User and Admin can access
 [ApiVersion("1.0")]  // ← This controller belongs to API v1.0
 public class AuthorsController : ControllerBase
 {

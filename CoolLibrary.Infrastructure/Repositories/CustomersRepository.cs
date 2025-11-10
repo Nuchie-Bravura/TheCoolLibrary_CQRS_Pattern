@@ -21,6 +21,7 @@ public class CustomersRepository : ICustomers
     public async Task<IEnumerable<Customer>> GetAllAsync()
     {
         return await _context.Customers
+            .Include(c => c.User)  // ? Include ApplicationUser
             .Include(c => c.Loans)
             .Include(c => c.Reservations)
             .Include(c => c.Fines)
@@ -30,6 +31,7 @@ public class CustomersRepository : ICustomers
     public async Task<Customer?> GetByIdAsync(int customerId)
     {
         return await _context.Customers
+            .Include(c => c.User)  // ? Include ApplicationUser
             .Include(c => c.Loans)
             .ThenInclude(l => l.Book)
             .Include(c => c.Reservations)
@@ -40,10 +42,12 @@ public class CustomersRepository : ICustomers
 
     public async Task<IEnumerable<Customer>> GetByNameAsync(string name)
     {
+        // Search in ApplicationUser.FirstName and LastName instead of Customer
         return await _context.Customers
-            .Where(c => c.FirstName.Contains(name) || 
-                       c.LastName.Contains(name) || 
-                       (c.FirstName + " " + c.LastName).Contains(name))
+            .Include(c => c.User)  // ? Include ApplicationUser
+            .Where(c => c.User.FirstName.Contains(name) || 
+                       c.User.LastName.Contains(name) || 
+                       (c.User.FirstName + " " + c.User.LastName).Contains(name))
             .Include(c => c.Loans)
             .Include(c => c.Reservations)
             .Include(c => c.Fines)
@@ -52,16 +56,19 @@ public class CustomersRepository : ICustomers
 
     public async Task<Customer?> GetByEmailAsync(string email)
     {
+        // Search in ApplicationUser.Email instead of Customer.Email
         return await _context.Customers
+            .Include(c => c.User)  // ? Include ApplicationUser
             .Include(c => c.Loans)
             .Include(c => c.Reservations)
             .Include(c => c.Fines)
-            .FirstOrDefaultAsync(c => c.Email == email);
+            .FirstOrDefaultAsync(c => c.User.Email == email);
     }
 
     public async Task<IEnumerable<Customer>> GetByMembershipStatusAsync(MembershipStatus status)
     {
         return await _context.Customers
+            .Include(c => c.User)  // ? Include ApplicationUser
             .Where(c => c.MembershipStatus == status)
             .Include(c => c.Loans)
             .Include(c => c.Reservations)
@@ -72,6 +79,7 @@ public class CustomersRepository : ICustomers
     public async Task<IEnumerable<Customer>> GetByCityAsync(string city)
     {
         return await _context.Customers
+            .Include(c => c.User)  // ? Include ApplicationUser
             .Where(c => c.City != null && c.City.Contains(city))
             .Include(c => c.Loans)
             .Include(c => c.Reservations)
@@ -82,6 +90,7 @@ public class CustomersRepository : ICustomers
     public async Task<IEnumerable<Customer>> GetCustomersWithActiveLoansAsync()
     {
         return await _context.Customers
+            .Include(c => c.User)  // ? Include ApplicationUser
             .Include(c => c.Loans)
             .ThenInclude(l => l.Book)
             .Include(c => c.Reservations)
@@ -93,6 +102,7 @@ public class CustomersRepository : ICustomers
     public async Task<IEnumerable<Customer>> GetCustomersWithUnpaidFinesAsync()
     {
         return await _context.Customers
+            .Include(c => c.User)  // ? Include ApplicationUser
             .Include(c => c.Loans)
             .Include(c => c.Reservations)
             .Include(c => c.Fines)
@@ -103,6 +113,7 @@ public class CustomersRepository : ICustomers
     public async Task<IEnumerable<Customer>> GetCustomersWithOverdueLoansAsync()
     {
         return await _context.Customers
+            .Include(c => c.User)  // ? Include ApplicationUser
             .Include(c => c.Loans)
             .ThenInclude(l => l.Book)
             .Include(c => c.Reservations)
@@ -180,7 +191,10 @@ public class CustomersRepository : ICustomers
 
     public async Task<bool> EmailExistsAsync(string email)
     {
-        return await _context.Customers.AnyAsync(c => c.Email == email);
+        // Check in ApplicationUser.Email instead of Customer.Email
+        return await _context.Customers
+            .Include(c => c.User)
+            .AnyAsync(c => c.User.Email == email);
     }
 
     public async Task<bool> UpdateMembershipStatusAsync(int customerId, MembershipStatus status)
