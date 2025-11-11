@@ -65,6 +65,19 @@ public class CustomersRepository : ICustomers
             .FirstOrDefaultAsync(c => c.User.Email == email);
     }
 
+    public async Task<Customer?> GetCustomerByUserIdAsync(string userId)
+    {
+        // ?? Get customer by ApplicationUser ID (from JWT token)
+        // This is used for secure operations where UserId comes from authentication
+        return await _context.Customers
+            .Include(c => c.User)  // Include ApplicationUser info
+            .Include(c => c.Loans)
+            .ThenInclude(l => l.Book)
+            .Include(c => c.Reservations)
+            .Include(c => c.Fines)
+            .FirstOrDefaultAsync(c => c.UserId == userId);
+    }
+
     public async Task<IEnumerable<Customer>> GetByMembershipStatusAsync(MembershipStatus status)
     {
         return await _context.Customers
