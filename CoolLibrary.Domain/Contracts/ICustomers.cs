@@ -36,6 +36,14 @@ public interface ICustomers
     Task<Customer?> GetByEmailAsync(string email);
 
     /// <summary>
+    /// Gets a customer by their ApplicationUser ID (from JWT token)
+    /// Used for secure operations where UserId comes from authentication
+    /// </summary>
+    /// <param name="userId">The ApplicationUser ID (GUID from AspNetUsers)</param>
+    /// <returns>The customer if found, null otherwise</returns>
+    Task<Customer?> GetCustomerByUserIdAsync(string userId);
+
+    /// <summary>
     /// Gets customers by membership status
     /// </summary>
     /// <param name="status">The membership status to filter by</param>
