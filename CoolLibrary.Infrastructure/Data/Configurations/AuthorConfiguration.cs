@@ -1,4 +1,4 @@
-using CoolLibrary.Domain.Entities;
+﻿using CoolLibrary.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -22,7 +22,12 @@ public class AuthorConfiguration : IEntityTypeConfiguration<Author>
         builder.Property(a => a.LastName)
             .IsRequired()
             .HasMaxLength(100);
-            
+
+        builder.Property(a => a.NormalizedFullName)
+            .IsRequired()
+            .HasMaxLength(201);
+
+
         builder.Property(a => a.Biography)
             .HasMaxLength(2000);
             
@@ -46,6 +51,10 @@ public class AuthorConfiguration : IEntityTypeConfiguration<Author>
         // Indexes
         builder.HasIndex(a => new { a.LastName, a.FirstName })
             .HasDatabaseName("IX_Authors_Name");
+        
+        builder.HasIndex(a => new { a.NormalizedFullName, a.BirthDate })
+            .IsUnique()
+            .HasDatabaseName("UX_Author_NormalizedFullName_BirthDate");
         
         // Ignore computed properties
         builder.Ignore(a => a.FullName);

@@ -41,7 +41,44 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Loans, opt => opt.Ignore())
             .ForMember(dest => dest.Reservations, opt => opt.Ignore())
             .ForMember(dest => dest.Fines, opt => opt.Ignore());
-            
+
+        // Author Mappings (Input - Create)
+
+        CreateMap<CreateAuthorRequestDTO, Author>()
+            .ForMember(dest => dest.FirstName,
+                opt => opt.MapFrom(src => src.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()))
+            .ForMember(dest => dest.LastName,
+                opt => opt.MapFrom(src =>
+                    string.Join(' ',
+                        src.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                           .Skip(1))))
+            .ForMember(dest => dest.PhotoURL, opt => opt.Ignore())
+            .ForMember(dest => dest.Biography, opt => opt.MapFrom(src => src.Biography))
+            .ForMember(dest => dest.Nationality, opt => opt.MapFrom(src => src.Nationality))
+            .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.BookAuthors, opt => opt.Ignore());
+
+
+        // Author Mappings (Output - Update)  HateOAS Implementation
+
+        CreateMap<Author, CreateAuthorResponseDTO>()
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}".Trim()))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+            .ForMember(dest => dest.Nationality, opt => opt.MapFrom(src => src.Nationality))
+            .ForMember(dest => dest.Links, opt => opt.MapFrom(src => new List<LinkDTO>
+            {
+                new LinkDTO
+                {
+                    Rel = "self",
+                    Href = $"/api/authors/{src.AuthorId}",
+                    Method = "GET"
+                }
+            }));
+
+
+
         // Customer Mappings (Input - Update)
         CreateMap<UpdateCustomerDTO, Customer>()
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));

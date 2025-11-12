@@ -144,6 +144,11 @@ namespace CoolLibrary.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("NormalizedFullName")
+                        .IsRequired()
+                        .HasMaxLength(201)
+                        .HasColumnType("nvarchar(201)");
+
                     b.Property<string>("PhotoURL")
                         .IsUnicode(false)
                         .HasColumnType("varchar(max)");
@@ -158,6 +163,11 @@ namespace CoolLibrary.Infrastructure.Migrations
                     b.HasIndex("LastName", "FirstName")
                         .HasDatabaseName("IX_Authors_Name");
 
+                    b.HasIndex("NormalizedFullName", "BirthDate")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Author_NormalizedFullName_BirthDate")
+                        .HasFilter("[BirthDate] IS NOT NULL");
+
                     b.ToTable("Authors");
 
                     b.HasData(
@@ -170,6 +180,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "George",
                             LastName = "Orwell",
                             Nationality = "British",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -181,6 +192,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Jane",
                             LastName = "Austen",
                             Nationality = "British",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -192,6 +204,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "J.K.",
                             LastName = "Rowling",
                             Nationality = "British",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -203,6 +216,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Gabriel",
                             LastName = "García Márquez",
                             Nationality = "Colombian",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -214,6 +228,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Stephen",
                             LastName = "King",
                             Nationality = "American",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -225,6 +240,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Agatha",
                             LastName = "Christie",
                             Nationality = "British",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -236,6 +252,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "J.R.R.",
                             LastName = "Tolkien",
                             Nationality = "British",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -247,6 +264,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Dan",
                             LastName = "Brown",
                             Nationality = "American",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -258,6 +276,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Isaac",
                             LastName = "Asimov",
                             Nationality = "American",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -269,6 +288,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Leo",
                             LastName = "Tolstoy",
                             Nationality = "Russian",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -280,6 +300,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "F. Scott",
                             LastName = "Fitzgerald",
                             Nationality = "American",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -291,6 +312,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Harper",
                             LastName = "Lee",
                             Nationality = "American",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -302,6 +324,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Ernest",
                             LastName = "Hemingway",
                             Nationality = "American",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -313,6 +336,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Paulo",
                             LastName = "Coelho",
                             Nationality = "Brazilian",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -324,6 +348,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Margaret",
                             LastName = "Atwood",
                             Nationality = "Canadian",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -335,6 +360,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Arthur",
                             LastName = "Conan Doyle",
                             Nationality = "British",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -346,6 +372,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Victor",
                             LastName = "Hugo",
                             Nationality = "French",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -357,6 +384,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Ray",
                             LastName = "Bradbury",
                             Nationality = "American",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -368,6 +396,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "C.S.",
                             LastName = "Lewis",
                             Nationality = "British",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
@@ -379,6 +408,7 @@ namespace CoolLibrary.Infrastructure.Migrations
                             FirstName = "Aldous",
                             LastName = "Huxley",
                             Nationality = "British",
+                            NormalizedFullName = "",
                             UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
                 });

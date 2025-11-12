@@ -82,4 +82,9 @@ public class AuthorsRepository : IAuthors
     {
         return await _context.SaveChangesAsync();
     }
+
+    public async Task<Author?> GetByIdAsync(int authorId)
+    {
+        return await _context.Authors.FirstOrDefaultAsync(a => a.AuthorId == authorId);
+    }
 }

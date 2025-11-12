@@ -81,4 +81,54 @@ public class AuthorsController : ControllerBase
             return StatusCode(500, "An error occurred while retrieving authors and their books");
         }
     }
+
+
+
+    /// <summary>
+    /// Allows Admin User to Create New Author
+    /// </summary>
+    /// <remarks>
+    /// Returns HTTP link to created autor. hateOAS can be used to get the created author details.
+    /// 
+    /// 
+    /// Response Sample:
+    /// 
+    ///     POST /api/authors/AddNewAuthor
+    ///     [
+    ///         {
+    ///             "FullName":"Casemiro Luciano",
+    ///             "Biography": "Young Brazilian Poet",
+    ///             "Nationality" : "Brazilian",
+    ///             "BirthDate": "2000-01-01",
+    ///             "PhotoURL": ""
+    ///         }
+    ///     ]
+    /// 
+    /// </remarks>
+    /// <returns>HTTP Link</returns>
+    /// <response code="200">Returns the http link of recently created author</response>
+    /// <response code="500">Internal server error occurred</response>
+    [HttpPost("AddNewAuthor")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> addNewAuthor([FromBody] CreateAuthorRequestDTO createAuthorRequestDTO)
+    {
+        try
+        {
+            var authorEntity = _mapper.Map<CoolLibrary.Domain.Entities.Author>(createAuthorRequestDTO);
+            var createdAuthor = await _authorsRepository.InsertAsync(authorEntity);
+            var response = _mapper.Map<CreateAuthorResponseDTO>(createdAuthor);
+
+            return CreatedAtAction(nameof(_authorsRepository.GetByIdAsync), new { id = createdAuthor.AuthorId, version = "1.0" }, response );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating new author");
+            return StatusCode(500, "An error occurred while creating the author");
+        }
+    }
+
+   
 }
