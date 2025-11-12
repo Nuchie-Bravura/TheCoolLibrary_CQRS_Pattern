@@ -28,7 +28,13 @@ public class AuthorConfiguration : IEntityTypeConfiguration<Author>
             
         builder.Property(a => a.Nationality)
             .HasMaxLength(100);
-            
+
+        builder.Property(a => a.PhotoURL)
+            .IsUnicode(false)
+            .IsRequired(false)
+            .HasDefaultValue(null);
+
+
         builder.Property(a => a.CreatedAt)
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");

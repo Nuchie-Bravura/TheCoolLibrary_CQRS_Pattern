@@ -36,7 +36,13 @@ public class Author
     /// Author's nationality
     /// </summary>
     public string? Nationality { get; set; }
-    
+
+    /// <summary>
+    /// URL to the author photo
+    /// </summary>
+    public string? PhotoURL { get; set; }
+
+
     /// <summary>
     /// Date when the author record was created
     /// </summary>

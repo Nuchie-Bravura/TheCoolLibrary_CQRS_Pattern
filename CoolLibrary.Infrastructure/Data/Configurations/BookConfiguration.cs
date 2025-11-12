@@ -25,7 +25,12 @@ public class BookConfiguration : IEntityTypeConfiguration<Book>
             
         builder.Property(b => b.Description)
             .HasMaxLength(2000);
-            
+
+        builder.Property(b => b.CoverPhotoURL)
+            .IsUnicode(false)
+            .IsRequired(false)
+            .HasDefaultValue(null);
+
         builder.Property(b => b.Publisher)
             .HasMaxLength(200);
             

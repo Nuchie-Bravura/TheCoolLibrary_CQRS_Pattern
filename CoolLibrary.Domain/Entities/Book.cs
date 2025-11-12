@@ -24,7 +24,13 @@ public class Book
     /// Description or summary of the book
     /// </summary>
     public string? Description { get; set; }
-    
+
+    /// <summary>
+    /// URL to the book cover photo
+    /// </summary>
+    public string? CoverPhotoURL { get; set; }
+
+
     /// <summary>
     /// Date when the book was published
     /// </summary>
