@@ -1,10 +1,10 @@
 using AutoMapper;
-using CoolLibrary.Application.DTO;
+using CoolLibrary.Application.DTO.LoansAndReservations;
 using CoolLibrary.Domain.Contracts;
 using CoolLibrary.Domain.Entities;
 using CoolLibrary.Domain.Enums;
 
-namespace CoolLibrary.Application.Services;
+namespace CoolLibrary.Application.Services.LoansAndReservations;
 
 public class LoanRequestService
 {

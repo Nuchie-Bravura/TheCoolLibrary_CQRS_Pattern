@@ -1,4 +1,4 @@
-namespace CoolLibrary.Application.DTO;
+namespace CoolLibrary.Application.DTO.Authentication;
 
 /// <summary>
 /// Data Transfer Object for authentication response

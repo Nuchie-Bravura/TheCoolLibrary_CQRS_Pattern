@@ -1,6 +1,6 @@
 using CoolLibrary.Domain.Enums;
 
-namespace CoolLibrary.Application.DTO;
+namespace CoolLibrary.Application.DTO.Customer;
 
 /// <summary>
 /// Data Transfer Object for creating a new Customer.

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using CoolLibrary.Application.DTO;
+using CoolLibrary.Application.DTO.Author;
 using CoolLibrary.Domain.Contracts;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CoolLibrary.Application.Services
+namespace CoolLibrary.Application.Services.Authors
 {
     public class GetAllAuthorsService
     {

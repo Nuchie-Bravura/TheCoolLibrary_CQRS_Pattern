@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
-using CoolLibrary.Application.DTO;
+using CoolLibrary.Application.DTO.Author;
+using CoolLibrary.Application.DTO.Book;
+using CoolLibrary.Application.DTO.Customer;
 using CoolLibrary.Domain.Entities;
 using CoolLibrary.Domain.Enums;
 

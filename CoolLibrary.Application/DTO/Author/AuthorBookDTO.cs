@@ -1,4 +1,4 @@
-namespace CoolLibrary.Application.DTO;
+namespace CoolLibrary.Application.DTO.Author;
 
 /// <summary>
 /// Represents a book within an author's data, simplified for nesting.

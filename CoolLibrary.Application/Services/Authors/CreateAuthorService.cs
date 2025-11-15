@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CoolLibrary.Application.Services
+namespace CoolLibrary.Application.Services.Authors
 {
     public class CreateAuthorService
     {

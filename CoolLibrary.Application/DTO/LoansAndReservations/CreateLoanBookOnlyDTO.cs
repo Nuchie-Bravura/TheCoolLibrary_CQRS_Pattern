@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace CoolLibrary.Application.DTO;
+namespace CoolLibrary.Application.DTO.LoansAndReservations;
 
 /// <summary>
 /// DTO SEGURO para crear préstamo

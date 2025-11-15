@@ -1,4 +1,4 @@
-namespace CoolLibrary.Application.DTO;
+namespace CoolLibrary.Application.DTO.LoansAndReservations;
 
 public class AvailabilityDTO
 {

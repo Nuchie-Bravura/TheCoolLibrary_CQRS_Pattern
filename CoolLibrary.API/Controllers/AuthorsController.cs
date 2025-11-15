@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using CoolLibrary.Application.DTO;
 using CoolLibrary.Domain.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Asp.Versioning;
-using CoolLibrary.Application.Services;
 using CoolLibrary.API.DTOs;
 using CoolLibrary.Domain.Entities;
+using CoolLibrary.Application.Services.Authors;
+using CoolLibrary.Application.DTO.Author;
 
 namespace CoolLibrary.API.Controllers;
 

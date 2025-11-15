@@ -1,5 +1,7 @@
 ﻿using CoolLibrary.Application.Mappings;
-using CoolLibrary.Application.Services;
+using CoolLibrary.Application.Services.Authors;
+using CoolLibrary.Application.Services.LoansAndReservations;
+using CoolLibrary.Application.Services.Token;
 using Microsoft.Extensions.DependencyInjection;
 
 

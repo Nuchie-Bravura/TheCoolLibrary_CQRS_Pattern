@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CoolLibrary.Application.DTO
+namespace CoolLibrary.Application.DTO.Book
 {    
     public class CreateBookRequestDTO
     {

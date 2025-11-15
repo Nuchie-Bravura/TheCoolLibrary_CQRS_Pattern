@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace CoolLibrary.Application.DTO;
+namespace CoolLibrary.Application.DTO.Customer;
 
 public class UpdateCustomerDTO
 {

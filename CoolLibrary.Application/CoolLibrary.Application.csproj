@@ -1,10 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <None Include="Services\AuthorBooksBaseService.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\CoolLibrary.Domain\CoolLibrary.Domain.csproj" />
   </ItemGroup>
 
@@ -17,6 +13,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.10" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\Books\" />
   </ItemGroup>
 
   <PropertyGroup>

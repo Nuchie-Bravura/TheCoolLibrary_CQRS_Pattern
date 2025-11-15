@@ -1,6 +1,6 @@
 using System;
 
-namespace CoolLibrary.Application.DTO;
+namespace CoolLibrary.Application.DTO.LoansAndReservations;
 
 public class LoanResponseDTO
 {

@@ -1,6 +1,6 @@
 ﻿using Asp.Versioning;
-using CoolLibrary.Application.DTO;
-using CoolLibrary.Application.Services;
+using CoolLibrary.Application.DTO.Authentication;
+using CoolLibrary.Application.Services.Token;
 using CoolLibrary.Domain.Entities;
 using CoolLibrary.Domain.Enums;
 using CoolLibrary.Infrastructure.Data;

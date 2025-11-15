@@ -1,11 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using CoolLibrary.Domain.Entities;  
+using CoolLibrary.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace CoolLibrary.Application.Services;
+namespace CoolLibrary.Application.Services.Token;
 
 /// <summary>
 /// Service responsible for generating JWT (JSON Web Token) tokens

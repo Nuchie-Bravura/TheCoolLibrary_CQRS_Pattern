@@ -1,6 +1,6 @@
 ﻿using Asp.Versioning;
 using AutoMapper;
-using CoolLibrary.Application.DTO;
+using CoolLibrary.Application.DTO.Book;
 using CoolLibrary.Domain.Contracts;
 using CoolLibrary.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
