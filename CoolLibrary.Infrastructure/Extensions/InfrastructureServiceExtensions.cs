@@ -27,6 +27,7 @@ namespace CoolLibrary.Infrastructure.Extensions
             services.AddScoped<IBooks, BooksRepository>();
             services.AddScoped<ICustomers, CustomersRepository>();
             services.AddScoped<ILoans, LoansRepository>();
+            services.AddScoped<IArchiveStorage, AzureArchiveStorageRepository>();
 
             return services;
         }

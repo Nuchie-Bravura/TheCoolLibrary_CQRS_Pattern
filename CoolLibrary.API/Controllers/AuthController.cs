@@ -108,8 +108,8 @@ public class AuthController : ControllerBase
                 UserName = registerDto.Email,
                 Email = registerDto.Email,
                 EmailConfirmed = true,
-                FirstName = registerDto.FirstName,   // ← NEW
-                LastName = registerDto.LastName,     // ← NEW
+                FirstName = registerDto.FirstName,  
+                LastName = registerDto.LastName,     
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <None Include="Services\AuthorBooksBaseService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CoolLibrary.Domain\CoolLibrary.Domain.csproj" />
   </ItemGroup>
 

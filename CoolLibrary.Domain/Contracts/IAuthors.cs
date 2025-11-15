@@ -20,8 +20,7 @@ namespace CoolLibrary.Domain.Contracts
         Task<Author> UpdateAsync(Author author);
         Task<Author?> PatchAsync(int authorId, Dictionary<string, object> updates);
         Task<Author?> GetByIdAsync(int authorId);
-
-
+        Task DeleteAsync(int authorId);
 
     }
 }

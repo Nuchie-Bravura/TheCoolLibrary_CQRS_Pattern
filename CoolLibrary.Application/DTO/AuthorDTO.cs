@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,8 +21,6 @@ namespace CoolLibrary.Application.DTO
 
    
         public string? Nationality { get; set; }
-
-        public string? PhotoURL { get; set; }
 
 
         public List<AuthorBookDTO> Books { get; set; } = new();

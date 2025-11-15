@@ -78,33 +78,35 @@ public class BooksController : ControllerBase
     /// <summary>
     /// Gets a specific book by ID
     /// </summary>
-    /// <param name="id">The book's unique identifier</param>
+    /// <param name="id">The book ID</param>
     /// <returns>Book details</returns>
     /// <response code="200">Returns the book successfully</response>
     /// <response code="404">Book not found</response>
+    /// <response code="500">Internal server error occurred</response>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(BookDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<BookDTO>> GetById(int id)
     {
         try
         {
             var book = await _booksRepository.GetByIdAsync(id);
-            
             if (book == null)
             {
-                return NotFound(new { message = $"Book with ID {id} not found" });
+                return NotFound($"Book with ID {id} not found.");
             }
-
+            
             var bookDTO = _mapper.Map<BookDTO>(book);
             return Ok(bookDTO);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving book {BookId}", id);
+            _logger.LogError(ex, "Error retrieving book with ID {BookId}", id);
             return StatusCode(500, "An error occurred while retrieving the book");
         }
     }
+
 
     /// <summary>
     /// Allows Admin User to Create New Book , Author(s) need to exists
@@ -148,88 +150,63 @@ public class BooksController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<BookDTO>> CreateNewBookEntry([FromBody] CreateBookRequestDTO createBookRequestDTO)
     {
-        // ✅ Validate ISBN uniqueness
-        var existingBookByISBN = await _booksRepository.GetByISBNAsync(createBookRequestDTO.ISBN);
-        if (existingBookByISBN != null)
+        // Validate copy counts
+        if (createBookRequestDTO.AvailableCopies < 0 || createBookRequestDTO.TotalCopies < 0)
         {
-            return Conflict(new 
-            { 
-                message = $"A book with ISBN '{createBookRequestDTO.ISBN}' already exists",
-                existingBookId = existingBookByISBN.BookId,
-                existingBookTitle = existingBookByISBN.Title
-            });
+            return BadRequest("Available copies and total copies must be greater than or equal to 0.");
         }
 
-        // Validate that all authors exist
-        if (createBookRequestDTO.Authors == null || !createBookRequestDTO.Authors.Any())
+        if (createBookRequestDTO.AvailableCopies > createBookRequestDTO.TotalCopies)
         {
-            return BadRequest(new { message = "At least one author is required" });
+            return BadRequest("Available copies cannot exceed total copies.");
         }
 
-        foreach (var authorId in createBookRequestDTO.Authors)
+        if (createBookRequestDTO.Authors != null && createBookRequestDTO.Authors.Any())
         {
-            var existingAuthor = await _authorsRepository.GetByIdAsync(authorId);
-            if (existingAuthor == null)
+            foreach (var authorId in createBookRequestDTO.Authors)
             {
-                return BadRequest(new { message = $"Author with ID {authorId} does not exist" });
+                var existingAuthor = await _authorsRepository.GetByIdAsync(authorId);
+                if (existingAuthor == null)
+                {
+                    return BadRequest($"Author with ID {authorId} does not exist.");
+                }
             }
         }
 
+
         try
         {
-            // Map DTO to Book entity
             var bookEntity = _mapper.Map<CoolLibrary.Domain.Entities.Book>(createBookRequestDTO);
             
-            // Create BookAuthor n-n relations
-            var authorOrder = 1;
-            bookEntity.BookAuthors = createBookRequestDTO.Authors.Select(authorId => new CoolLibrary.Domain.Entities.BookAuthor
+            // Create BookAuthor relationships
+            if (createBookRequestDTO.Authors != null && createBookRequestDTO.Authors.Any())
             {
-                AuthorId = authorId,
-                Book = bookEntity,  
-                AuthorOrder = authorOrder++
-            }).ToList();
-
-            // Insert book with authors
+                var bookAuthors = new List<CoolLibrary.Domain.Entities.BookAuthor>();
+                int order = 1;
+                foreach (var authorId in createBookRequestDTO.Authors)
+                {
+                    bookAuthors.Add(new CoolLibrary.Domain.Entities.BookAuthor
+                    {
+                        AuthorId = authorId,
+                        AuthorOrder = order++
+                    });
+                }
+                bookEntity.BookAuthors = bookAuthors;
+            }
+            
             var createdBook = await _booksRepository.InsertAsync(bookEntity);
             
-            // Reload book with relations
-            createdBook = await _booksRepository.GetByIdAsync(createdBook.BookId);
+            // Reload the book with authors included for proper mapping
+            var bookWithAuthors = await _booksRepository.GetByIdAsync(createdBook.BookId);
             
-            var response = _mapper.Map<CreateBookResponseDTO>(createdBook);
+            var response = _mapper.Map<CreateBookResponseDTO>(bookWithAuthors);
 
-            _logger.LogInformation(
-                "✅ Book created successfully: ID={BookId}, Title={Title}, ISBN={ISBN}, Authors={AuthorCount}",
-                createdBook!.BookId,
-                createdBook.Title,
-                createdBook.ISBN,
-                createdBook.BookAuthors.Count);
-
-            return CreatedAtAction(
-                nameof(GetById), 
-                new { id = createdBook.BookId }, 
-                response
-            );
-        }
-        catch (Microsoft.EntityFrameworkCore.DbUpdateException ex) 
-            when (ex.InnerException?.Message.Contains("IX_Books_ISBN") == true)
-        {
-            // ISBN duplicate constraint violation (fallback if validation missed it)
-            _logger.LogWarning(ex, "Duplicate ISBN constraint violation: {ISBN}", createBookRequestDTO.ISBN);
-            return Conflict(new { message = $"A book with ISBN '{createBookRequestDTO.ISBN}' already exists" });
+            return CreatedAtAction(nameof(GetById), new { id = createdBook.BookId, version = "1.0" }, response);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating new book");
-            
-            var innerMessage = ex.InnerException?.Message ?? "No inner exception";
-            _logger.LogError("Inner exception: {InnerMessage}", innerMessage);
-            
-            return StatusCode(500, new 
-            { 
-                message = "An error occurred while creating the book", 
-                error = ex.Message,
-                innerError = innerMessage
-            });
+            return StatusCode(500, $"An error occurred while creating the book: {ex.InnerException?.Message ?? ex.Message}");
         }
     }
 }

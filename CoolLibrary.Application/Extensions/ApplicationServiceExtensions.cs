@@ -13,6 +13,10 @@ namespace CoolLibrary.Application.Extensions
             // Application Services
             services.AddScoped<LoanRequestService>();
             services.AddScoped<TokenService>();
+            services.AddScoped<GetAllAuthorsService>();
+            services.AddScoped<CreateAuthorService>();
+            services.AddScoped<DeleteAuthorService>();  
+
 
             // AutoMapper
             services.AddAutoMapper(typeof(MappingProfile).Assembly);

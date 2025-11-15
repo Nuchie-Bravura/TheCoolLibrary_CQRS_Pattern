@@ -11,6 +11,7 @@ namespace CoolLibrary.Infrastructure.Repositories;
 public class AuthorsRepository : IAuthors
 {
     private readonly LibraryDbContext _context;
+ 
 
     public AuthorsRepository(LibraryDbContext context)
     {
@@ -40,6 +41,7 @@ public class AuthorsRepository : IAuthors
     {
         author.CreatedAt = DateTime.UtcNow;
         author.UpdatedAt = DateTime.UtcNow;
+        author.NormalizeName(); 
         
         await _context.Authors.AddAsync(author);
         await _context.SaveChangesAsync();
@@ -50,6 +52,7 @@ public class AuthorsRepository : IAuthors
     public async Task<Author> UpdateAsync(Author author)
     {
         author.UpdatedAt = DateTime.UtcNow;
+        author.NormalizeName();
         
         _context.Authors.Update(author);
         await _context.SaveChangesAsync();
@@ -86,5 +89,23 @@ public class AuthorsRepository : IAuthors
     public async Task<Author?> GetByIdAsync(int authorId)
     {
         return await _context.Authors.FirstOrDefaultAsync(a => a.AuthorId == authorId);
+    }
+
+    /**
+     * Deletes an author by their ID.
+     */
+    public async Task DeleteAsync(int authorId)
+    {
+        var author = await _context.Authors.FindAsync(authorId);
+      
+        if (author != null)
+        {
+            _context.Authors.Remove(author);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            return;
+        }
     }
 }

@@ -3,6 +3,7 @@ using Asp.Versioning;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http;
 
 namespace CoolLibrary.API.Extensions
 {
@@ -44,6 +45,13 @@ namespace CoolLibrary.API.Extensions
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
                     Description = "JWT Authorization header using the Bearer scheme."
+                });
+
+                // Support for multipart/form-data file uploads
+                options.MapType<IFormFile>(() => new OpenApiSchema
+                {
+                    Type = "string",
+                    Format = "binary"
                 });
             });
 

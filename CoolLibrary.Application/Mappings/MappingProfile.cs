@@ -43,6 +43,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Fines, opt => opt.Ignore());
 
         // Author Mappings (Input - Create)
+
         CreateMap<CreateAuthorRequestDTO, Author>()
             .ForMember(dest => dest.FirstName,
                 opt => opt.MapFrom(src => src.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()))
@@ -60,7 +61,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.BookAuthors, opt => opt.Ignore());
 
 
-        // Author Mappings (Output - Create) - HATEOAS Implementation ✅ MEJORADO
+        // Author Mappings (Output - Update)  HateOAS Implementation
 
         CreateMap<Author, CreateAuthorResponseDTO>()
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}".Trim()))
@@ -71,84 +72,45 @@ public class MappingProfile : Profile
                 new LinkDTO
                 {
                     Rel = "self",
-                    Href = $"/api/v1/authors/{src.AuthorId}",
+                    Href = $"/api/authors/{src.AuthorId}",
                     Method = "GET"
-                },
-                new LinkDTO
-                {
-                    Rel = "books",
-                    Href = $"/api/v1/authors/{src.AuthorId}/books",
-                    Method = "GET"
-                },
-                new LinkDTO
-                {
-                    Rel = "update",
-                    Href = $"/api/v1/authors/{src.AuthorId}",
-                    Method = "PUT"
-                },
-                new LinkDTO
-                {
-                    Rel = "delete",
-                    Href = $"/api/v1/authors/{src.AuthorId}",
-                    Method = "DELETE"
                 }
             }));
 
-        //Book Mappings (Input - Create) 
+        //Book Mappings (Input - Create)
 
         CreateMap<CreateBookRequestDTO, Book>()
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
             .ForMember(dest => dest.ISBN, opt => opt.MapFrom(src => src.ISBN))
-            .ForMember(dest => dest.Publisher, opt => opt.MapFrom(src => src.Publisher))
             .ForMember(dest => dest.PublicationDate, opt => opt.MapFrom(src => src.PublicationDate))
+            .ForMember(dest => dest.Publisher, opt => opt.MapFrom(src => src.Publisher))
             .ForMember(dest => dest.PageCount, opt => opt.MapFrom(src => src.PageCount))
             .ForMember(dest => dest.TotalCopies, opt => opt.MapFrom(src => src.TotalCopies))
-            // ✅ Si no envían AvailableCopies, usar TotalCopies por defecto
-            .ForMember(dest => dest.AvailableCopies, opt => opt.MapFrom(src => 
-                src.AvailableCopies > 0 ? src.AvailableCopies : src.TotalCopies))
-            // ✅ Language por defecto "English" si no se envía
-            .ForMember(dest => dest.Language, opt => opt.MapFrom(src => 
-                string.IsNullOrEmpty(src.Language) ? "English" : src.Language))
+            .ForMember(dest => dest.AvailableCopies, opt => opt.MapFrom(src => src.AvailableCopies))
+            .ForMember(dest => dest.Language, opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.Language) ? src.Language : "English"))
             .ForMember(dest => dest.CoverPhotoURL, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.BookAuthors, opt => opt.Ignore())
-            .ForMember(dest => dest.BookGenres, opt => opt.Ignore());
+            .ForMember(dest => dest.BookGenres, opt => opt.Ignore())
+            .ForMember(dest => dest.Loans, opt => opt.Ignore())
+            .ForMember(dest => dest.Reservations, opt => opt.Ignore());
 
 
-        // Book Mappings (Output - Create) - HATEOAS 
+        // Book Mappings (Output - Create)  HateOAS Implementation
         CreateMap<Book, CreateBookResponseDTO>()
             .ForMember(dest => dest.BookId, opt => opt.MapFrom(src => src.BookId))
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
-            .ForMember(dest => dest.Authors, opt => opt.MapFrom(src => 
-                src.BookAuthors.Select(ba => ba.Author)))
-           
-            .ForMember(dest => dest.Links, opt => opt.MapFrom(src => new List<LinkDTO>
+            .ForMember(dest => dest.Authors, opt => opt.MapFrom(src => src.BookAuthors.Select(ba => ba.Author)))
+            .ForMember(dest => dest.Links, opt => opt.MapFrom(src => new List<LinkBookDTO>
             {
-                new LinkDTO
+                new LinkBookDTO
                 {
                     Rel = "self",
-                    Href = $"/api/v1/books/{src.BookId}",
+                    Href = $"/api/v1.0/books/{src.BookId}",
                     Method = "GET"
-                },
-                new LinkDTO
-                {
-                    Rel = "authors",  // ✅ NUEVO: Ver autores del libro
-                    Href = $"/api/v1/books/{src.BookId}/authors",
-                    Method = "GET"
-                },
-                new LinkDTO
-                {
-                    Rel = "update",
-                    Href = $"/api/v1/books/{src.BookId}",
-                    Method = "PUT"
-                },
-                new LinkDTO
-                {
-                    Rel = "delete",
-                    Href = $"/api/v1/books/{src.BookId}",
-                    Method = "DELETE"
                 }
             }));
 

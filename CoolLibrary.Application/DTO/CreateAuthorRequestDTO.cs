@@ -16,6 +16,6 @@ namespace CoolLibrary.Application.DTO
         public string? Nationality { get; set; }
         public DateTime? BirthDate { get; set; }
 
-        public IFormFile? PhotoURL { get; set; }
+        public IFormFile? PhotoFile { get; set; }
     }
 }

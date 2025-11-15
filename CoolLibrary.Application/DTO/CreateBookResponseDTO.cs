@@ -14,6 +14,13 @@ namespace CoolLibrary.Application.DTO
 
         public IEnumerable<AuthorDTO> Authors { get; set; } = new List<AuthorDTO>();
          
-        public IEnumerable<LinkDTO> Links { get; set; } = new List<LinkDTO>();
+        public IEnumerable<LinkBookDTO> Links { get; set; } = new List<LinkBookDTO>();
     }
-}   
+
+    public class LinkBookDTO
+    {
+            public string Rel { get; set; } = string.Empty;
+            public string Href { get; set; } = string.Empty; // URL
+            public string Method { get; set; } = string.Empty;
+    }
+}
