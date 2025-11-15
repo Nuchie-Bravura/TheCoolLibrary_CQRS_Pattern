@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoolLibrary.Application.DTO.HATEOAS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,12 +14,5 @@ namespace CoolLibrary.Application.DTO.Author
         public string Nationality { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public IEnumerable<LinkDTO> Links { get; set; } = new List<LinkDTO>();
-    }
-
-    public class LinkDTO
-    {
-        public string Rel { get; set; } = string.Empty;  
-        public string Href { get; set; } = string.Empty; // URL
-        public string Method { get; set; } = string.Empty; 
     }
 }

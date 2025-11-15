@@ -2,6 +2,7 @@
 using CoolLibrary.Application.DTO.Author;
 using CoolLibrary.Application.DTO.Book;
 using CoolLibrary.Application.DTO.Customer;
+using CoolLibrary.Application.DTO.HATEOAS;
 using CoolLibrary.Domain.Entities;
 using CoolLibrary.Domain.Enums;
 
@@ -106,9 +107,9 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
             .ForMember(dest => dest.Authors, opt => opt.MapFrom(src => src.BookAuthors.Select(ba => ba.Author)))
-            .ForMember(dest => dest.Links, opt => opt.MapFrom(src => new List<LinkBookDTO>
+            .ForMember(dest => dest.Links, opt => opt.MapFrom(src => new List<LinkDTO>
             {
-                new LinkBookDTO
+                new LinkDTO
                 {
                     Rel = "self",
                     Href = $"/api/v1.0/books/{src.BookId}",

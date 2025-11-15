@@ -1,4 +1,5 @@
 ﻿using CoolLibrary.Application.DTO.Author;
+using CoolLibrary.Application.DTO.HATEOAS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,13 +16,6 @@ namespace CoolLibrary.Application.DTO.Book
 
         public IEnumerable<AuthorDTO> Authors { get; set; } = new List<AuthorDTO>();
          
-        public IEnumerable<LinkBookDTO> Links { get; set; } = new List<LinkBookDTO>();
-    }
-
-    public class LinkBookDTO
-    {
-            public string Rel { get; set; } = string.Empty;
-            public string Href { get; set; } = string.Empty; // URL
-            public string Method { get; set; } = string.Empty;
+        public IEnumerable<LinkDTO> Links { get; set; } = new List<LinkDTO>();
     }
 }
