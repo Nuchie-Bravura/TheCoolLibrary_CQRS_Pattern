@@ -2,6 +2,7 @@
 using CoolLibrary.Application.DTO.Author;
 using CoolLibrary.Application.DTO.Book;
 using CoolLibrary.Domain.Contracts;
+using CoolLibrary.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
 
@@ -9,7 +10,6 @@ namespace CoolLibrary.Application.Services.Books
 {
     public class CreateBookService
     {
-
         private readonly IBooks _booksRepository;
         private readonly IAuthors _authorsRepository;
         private readonly IArchiveStorage _archiveStorage;
@@ -57,7 +57,7 @@ namespace CoolLibrary.Application.Services.Books
                     throw new ArgumentException("At least one author must be specified.");
                 }
 
-                // map DTO to entity
+                // Map DTO to entity (AutoMapper now handles BookAuthors creation)
                 var bookEntity = _mapper.Map<Domain.Entities.Book>(createBookRequestDTO);
 
                 // If cover image is provided, upload it to Azure storage
@@ -73,7 +73,6 @@ namespace CoolLibrary.Application.Services.Books
 
                 var createdBook = await _booksRepository.InsertAsync(bookEntity);
 
-               
                 return  _mapper.Map<CreateBookResponseDTO>(createdBook);
             }
             catch (Exception ex)

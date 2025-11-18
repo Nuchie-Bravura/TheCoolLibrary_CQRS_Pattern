@@ -95,7 +95,14 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.CoverPhotoURL, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.BookAuthors, opt => opt.Ignore())
+     
+            .ForMember(dest => dest.BookAuthors, opt => opt.MapFrom((src, dest, destMember, context) =>
+                src.Authors.Select((authorId, index) => new BookAuthor
+                {
+                    AuthorId = authorId,
+                    AuthorOrder = index + 1
+                }).ToList()))
+
             .ForMember(dest => dest.BookGenres, opt => opt.Ignore())
             .ForMember(dest => dest.Loans, opt => opt.Ignore())
             .ForMember(dest => dest.Reservations, opt => opt.Ignore());

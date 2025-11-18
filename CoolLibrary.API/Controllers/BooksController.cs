@@ -129,5 +129,27 @@ public class BooksController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = createdBook.BookId, version = "1.0" }, createdBook);
     }
 
+    /// <summary>
+    /// Deletes a book by ID
+    /// deletes the book identified by the given ID from the library catalog.
+    ///     deletes blob from storage if exists
+    ///     deletes book record from database
+    /// </summary>
+    /// <param name="bookId">The ID of the book to delete</param>
+    /// <returns>NoContent if successful</returns>
+    /// <response code="204">NoContent if successful</response>
+    /// <response code="404">NotFound if the book does not exist</response>
+    /// 
+    [HttpDelete("{bookId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Authorize(Roles = "Admin")]
+
+    public async Task<IActionResult> DeleteBook(int bookId)
+    {
+        await _deleteBookService.SafeBookDeleteAsync(bookId);
+        return NoContent();
+    }
+
 
 }
