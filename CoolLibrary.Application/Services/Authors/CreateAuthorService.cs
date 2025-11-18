@@ -1,38 +1,60 @@
 ﻿using AutoMapper;
-using CoolLibrary.Application.DTO;
+using CoolLibrary.Application.DTO.Author;
 using CoolLibrary.Domain.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CoolLibrary.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
-namespace CoolLibrary.Application.Services.Authors
+namespace CoolLibrary.Application.Services.Authors;
+
+public class CreateAuthorService
 {
-    public class CreateAuthorService
+    private readonly IAuthors _authorsRepository;
+    private readonly IArchiveStorage _archiveStorage;
+    private readonly IMapper _mapper;
+    private readonly ILogger<CreateAuthorService> _logger;
+
+    public CreateAuthorService(
+        IAuthors authorsRepository,
+        IArchiveStorage archiveStorage,
+        IMapper mapper,
+        ILogger<CreateAuthorService> logger)
     {
-        private readonly IAuthors _authorsRepository;
-        private readonly IArchiveStorage _archiveStorage;
-        private readonly IMapper _mapper;
+        _authorsRepository = authorsRepository;
+        _archiveStorage = archiveStorage;
+        _mapper = mapper;
+        _logger = logger;
+    }
 
-        public CreateAuthorService(IAuthors authorsRepository, IArchiveStorage archiveStorage, IMapper mapper)
+    public async Task<CreateAuthorResponseDTO> ExecuteAsync(CreateAuthorRequestDTO createAuthorRequestDTO)
+    {
+        try
         {
-            _authorsRepository = authorsRepository;
-            _archiveStorage = archiveStorage;
-            _mapper = mapper;
-        }
+            // Map DTO → entidad
+            var authorEntity = _mapper.Map<Author>(createAuthorRequestDTO);
 
-        public async Task<Domain.Entities.Author> ExecuteAsync(Domain.Entities.Author author, Stream? photoStream = null, string? photoFileName = null, string? photoContentType = null)
-        {
-            // If photo is provided, upload it to Azure storage
-            if (photoStream != null && !string.IsNullOrEmpty(photoFileName))
+
+            // upload file if exits
+            if (createAuthorRequestDTO.PhotoFile != null)
             {
-                var photoUrl = await _archiveStorage.StoreAsync(photoStream, photoFileName, photoContentType ?? "image/jpeg");
-                author.PhotoURL = photoUrl;
+                using var stream = createAuthorRequestDTO.PhotoFile.OpenReadStream();
+                var photoUrl = await _archiveStorage.StoreAsync(
+                    stream,
+                    createAuthorRequestDTO.PhotoFile.FileName,
+                    createAuthorRequestDTO.PhotoFile.ContentType ?? "image/jpeg");
+                authorEntity.PhotoURL = photoUrl;
             }
 
-            var createdAuthor = await _authorsRepository.InsertAsync(author);
-            return createdAuthor;
+            // Insert DB
+            var createdAuthor = await _authorsRepository.InsertAsync(authorEntity);
+
+            // Map entidad → DTO 
+            var responseDto = _mapper.Map<CreateAuthorResponseDTO>(createdAuthor);
+            return responseDto;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating new author with name {FullName}", createAuthorRequestDTO.FullName);
+            throw;
         }
     }
 }

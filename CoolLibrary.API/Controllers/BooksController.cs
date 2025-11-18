@@ -1,10 +1,10 @@
 ﻿using Asp.Versioning;
-using AutoMapper;
 using CoolLibrary.Application.DTO.Book;
-using CoolLibrary.Domain.Contracts;
-using CoolLibrary.Infrastructure.Repositories;
+using CoolLibrary.Application.Services.Books;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+
 
 namespace CoolLibrary.API.Controllers;
 
@@ -20,17 +20,15 @@ namespace CoolLibrary.API.Controllers;
 [ApiVersion("1.0")]  // ← This controller belongs to API v1.0
 public class BooksController : ControllerBase
 {
-    private readonly IBooks _booksRepository;
-    private readonly ILogger<BooksController> _logger;
-    private readonly IMapper _mapper;
-    private readonly IAuthors _authorsRepository;
+    private readonly CreateBookService _createBookService;
+    private readonly GetAllBooksService _getAllBooksService;    
+    private readonly DeleteBookService _deleteBookService;
 
-    public BooksController(IBooks booksRepository, ILogger<BooksController> logger, IMapper mapper, IAuthors authorsRepository)
+    public BooksController(  CreateBookService createBookService, GetAllBooksService getAllBooksService, DeleteBookService deleteBookService)
     {
-        _booksRepository = booksRepository;
-        _logger = logger;
-        _mapper = mapper;
-        _authorsRepository = authorsRepository;
+        _getAllBooksService = getAllBooksService;
+        _deleteBookService = deleteBookService;
+        _createBookService = createBookService;
     }
 
     /// <summary>
@@ -62,17 +60,8 @@ public class BooksController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<BookDTO>>> GetAll()
     {
-        try
-        {
-            var books = await _booksRepository.GetAllAsync();
-            var bookDTOs = _mapper.Map<IEnumerable<BookDTO>>(books);
-            return Ok(bookDTOs);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving all books");
-            return StatusCode(500, "An error occurred while retrieving books");
-        }
+        var books = await _getAllBooksService.ExecuteAsync();
+        return Ok(books);
     }
 
     /// <summary>
@@ -87,24 +76,10 @@ public class BooksController : ControllerBase
     [ProducesResponseType(typeof(BookDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<BookDTO>> GetById(int id)
+    public async Task<ActionResult> GetById(int bookID)
     {
-        try
-        {
-            var book = await _booksRepository.GetByIdAsync(id);
-            if (book == null)
-            {
-                return NotFound($"Book with ID {id} not found.");
-            }
-            
-            var bookDTO = _mapper.Map<BookDTO>(book);
-            return Ok(bookDTO);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving book with ID {BookId}", id);
-            return StatusCode(500, "An error occurred while retrieving the book");
-        }
+         var book = await _getAllBooksService.GetByIdAsync(bookID);
+         return Ok(book);
     }
 
 
@@ -148,65 +123,11 @@ public class BooksController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<BookDTO>> CreateNewBookEntry([FromBody] CreateBookRequestDTO createBookRequestDTO)
+    public async Task<ActionResult<BookDTO>> CreateNewBookEntry([FromForm] CreateBookRequestDTO createBookRequestDTO)
     {
-        // Validate copy counts
-        if (createBookRequestDTO.AvailableCopies < 0 || createBookRequestDTO.TotalCopies < 0)
-        {
-            return BadRequest("Available copies and total copies must be greater than or equal to 0.");
-        }
-
-        if (createBookRequestDTO.AvailableCopies > createBookRequestDTO.TotalCopies)
-        {
-            return BadRequest("Available copies cannot exceed total copies.");
-        }
-
-        if (createBookRequestDTO.Authors != null && createBookRequestDTO.Authors.Any())
-        {
-            foreach (var authorId in createBookRequestDTO.Authors)
-            {
-                var existingAuthor = await _authorsRepository.GetByIdAsync(authorId);
-                if (existingAuthor == null)
-                {
-                    return BadRequest($"Author with ID {authorId} does not exist.");
-                }
-            }
-        }
-
-
-        try
-        {
-            var bookEntity = _mapper.Map<CoolLibrary.Domain.Entities.Book>(createBookRequestDTO);
-            
-            // Create BookAuthor relationships
-            if (createBookRequestDTO.Authors != null && createBookRequestDTO.Authors.Any())
-            {
-                var bookAuthors = new List<CoolLibrary.Domain.Entities.BookAuthor>();
-                int order = 1;
-                foreach (var authorId in createBookRequestDTO.Authors)
-                {
-                    bookAuthors.Add(new CoolLibrary.Domain.Entities.BookAuthor
-                    {
-                        AuthorId = authorId,
-                        AuthorOrder = order++
-                    });
-                }
-                bookEntity.BookAuthors = bookAuthors;
-            }
-            
-            var createdBook = await _booksRepository.InsertAsync(bookEntity);
-            
-            // Reload the book with authors included for proper mapping
-            var bookWithAuthors = await _booksRepository.GetByIdAsync(createdBook.BookId);
-            
-            var response = _mapper.Map<CreateBookResponseDTO>(bookWithAuthors);
-
-            return CreatedAtAction(nameof(GetById), new { id = createdBook.BookId, version = "1.0" }, response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating new book");
-            return StatusCode(500, $"An error occurred while creating the book: {ex.InnerException?.Message ?? ex.Message}");
-        }
+        var createdBook = await _createBookService.ExecuteAsync(createBookRequestDTO);
+        return CreatedAtAction(nameof(GetById), new { id = createdBook.BookId, version = "1.0" }, createdBook);
     }
+
+
 }

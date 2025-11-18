@@ -14,8 +14,6 @@ namespace CoolLibrary.Application.DTO.Book
 
         public string? Description { get; set; }
 
-        public IFormFile? CoverPhotoURL { get; set; }
-
         public string ISBN { get; set; } = string.Empty;
 
         public string? Publisher {get; set; }
@@ -25,6 +23,8 @@ namespace CoolLibrary.Application.DTO.Book
         public int PageCount { get; set; }
         public int TotalCopies { get; set; }
         public int AvailableCopies { get; set; }
+
+        public IFormFile? PhotoFile { get; set; }
 
         /// <summary>
         /// Language of the book (default: "English")
