@@ -15,12 +15,12 @@ namespace CoolLibrary.Application.Services.Books
 
         private readonly IBooks _booksRepository;
         private readonly IArchiveStorage _archiveStorage;
-        private readonly ILogger<DeleteAuthorService> _logger;
+        private readonly ILogger<DeleteBookService> _logger;
 
         public DeleteBookService(
             IBooks booksRepository,
             IArchiveStorage archiveStorage,
-            ILogger<DeleteAuthorService> logger)
+            ILogger<DeleteBookService> logger)
         {
             _booksRepository = booksRepository;
             _archiveStorage = archiveStorage;
