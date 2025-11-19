@@ -21,7 +21,12 @@ public class Author
     /// Author's last name
     /// </summary>
     public string LastName { get; set; } = string.Empty;
-    
+
+    /// <summary>
+    /// Gets or sets the normalized version of the full name. we will use this as unique key
+    /// </summary>
+    public string NormalizedFullName { get; set; } = string.Empty;
+
     /// <summary>
     /// Biography or description of the author
     /// </summary>
@@ -36,7 +41,13 @@ public class Author
     /// Author's nationality
     /// </summary>
     public string? Nationality { get; set; }
-    
+
+    /// <summary>
+    /// URL to the author photo
+    /// </summary>
+    public string? PhotoURL { get; set; }
+
+
     /// <summary>
     /// Date when the author record was created
     /// </summary>
@@ -58,4 +69,12 @@ public class Author
     /// Full name property for convenience
     /// </summary>
     public string FullName => $"{FirstName} {LastName}".Trim();
+
+    public void NormalizeName()
+    {
+        NormalizedFullName = $"{FirstName} {LastName}"
+            .ToUpperInvariant()
+            .Trim()
+            .Replace("  ", " ");
+    }
 }

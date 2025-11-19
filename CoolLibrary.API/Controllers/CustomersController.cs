@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
-using CoolLibrary.Application.DTO;
 using CoolLibrary.Domain.Contracts;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Asp.Versioning;
+using CoolLibrary.Application.DTO.Customer;
 
 namespace CoolLibrary.API.Controllers;
 

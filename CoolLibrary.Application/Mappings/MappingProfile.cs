@@ -1,5 +1,8 @@
-using AutoMapper;
-using CoolLibrary.Application.DTO;
+﻿using AutoMapper;
+using CoolLibrary.Application.DTO.Author;
+using CoolLibrary.Application.DTO.Book;
+using CoolLibrary.Application.DTO.Customer;
+using CoolLibrary.Application.DTO.HATEOAS;
 using CoolLibrary.Domain.Entities;
 using CoolLibrary.Domain.Enums;
 
@@ -41,7 +44,87 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Loans, opt => opt.Ignore())
             .ForMember(dest => dest.Reservations, opt => opt.Ignore())
             .ForMember(dest => dest.Fines, opt => opt.Ignore());
-            
+
+        // Author Mappings (Input - Create)
+
+        CreateMap<CreateAuthorRequestDTO, Author>()
+            .ForMember(dest => dest.FirstName,
+                opt => opt.MapFrom(src => src.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()))
+            .ForMember(dest => dest.LastName,
+                opt => opt.MapFrom(src =>
+                    string.Join(' ',
+                        src.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                           .Skip(1))))
+            .ForMember(dest => dest.PhotoURL, opt => opt.Ignore())
+            .ForMember(dest => dest.Biography, opt => opt.MapFrom(src => src.Biography))
+            .ForMember(dest => dest.Nationality, opt => opt.MapFrom(src => src.Nationality))
+            .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.BookAuthors, opt => opt.Ignore());
+
+
+        // Author Mappings (Output - Update)  HateOAS Implementation
+
+        CreateMap<Author, CreateAuthorResponseDTO>()
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}".Trim()))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+            .ForMember(dest => dest.Nationality, opt => opt.MapFrom(src => src.Nationality))
+            .ForMember(dest => dest.Links, opt => opt.MapFrom(src => new List<LinkDTO>
+            {
+                new LinkDTO
+                {
+                    Rel = "self",
+                    Href = $"/api/authors/{src.AuthorId}",
+                    Method = "GET"
+                }
+            }));
+
+        //Book Mappings (Input - Create)
+
+        CreateMap<CreateBookRequestDTO, Book>()
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+            .ForMember(dest => dest.ISBN, opt => opt.MapFrom(src => src.ISBN))
+            .ForMember(dest => dest.PublicationDate, opt => opt.MapFrom(src => src.PublicationDate))
+            .ForMember(dest => dest.Publisher, opt => opt.MapFrom(src => src.Publisher))
+            .ForMember(dest => dest.PageCount, opt => opt.MapFrom(src => src.PageCount))
+            .ForMember(dest => dest.TotalCopies, opt => opt.MapFrom(src => src.TotalCopies))
+            .ForMember(dest => dest.AvailableCopies, opt => opt.MapFrom(src => src.AvailableCopies))
+            .ForMember(dest => dest.Language, opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.Language) ? src.Language : "English"))
+            .ForMember(dest => dest.CoverPhotoURL, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+     
+            .ForMember(dest => dest.BookAuthors, opt => opt.MapFrom((src, dest, destMember, context) =>
+                src.Authors.Select((authorId, index) => new BookAuthor
+                {
+                    AuthorId = authorId,
+                    AuthorOrder = index + 1
+                }).ToList()))
+
+            .ForMember(dest => dest.BookGenres, opt => opt.Ignore())
+            .ForMember(dest => dest.Loans, opt => opt.Ignore())
+            .ForMember(dest => dest.Reservations, opt => opt.Ignore());
+
+
+        // Book Mappings (Output - Create)  HateOAS Implementation
+        CreateMap<Book, CreateBookResponseDTO>()
+            .ForMember(dest => dest.BookId, opt => opt.MapFrom(src => src.BookId))
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+            .ForMember(dest => dest.Authors, opt => opt.MapFrom(src => src.BookAuthors.Select(ba => ba.Author)))
+            .ForMember(dest => dest.Links, opt => opt.MapFrom(src => new List<LinkDTO>
+            {
+                new LinkDTO
+                {
+                    Rel = "self",
+                    Href = $"/api/v1.0/books/{src.BookId}",
+                    Method = "GET"
+                }
+            }));
+
+
         // Customer Mappings (Input - Update)
         CreateMap<UpdateCustomerDTO, Customer>()
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));

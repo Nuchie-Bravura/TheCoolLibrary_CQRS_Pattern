@@ -60,6 +60,28 @@ public class BooksRepository : IBooks
             .FirstOrDefaultAsync(b => b.ISBN == isbn);
     }
 
+
+    /**
+     * SELECT 
+         b.[BookId], b.[ISBN], b.[Title], b.[Description], 
+         b.[Publisher], b.[PageCount], b.[Language],
+         b.[AvailableCopies], b.[TotalCopies], b.[CreatedAt], b.[UpdatedAt],
+         ba.[BookId], ba.[AuthorId], ba.[AuthorOrder],
+         a.[AuthorId], a.[Biography], a.[Nationality], a.[CreatedAt], a.[UpdatedAt],
+         bg.[BookId], bg.[GenreId],
+         g.[GenreId], g.[Description], g.[CreatedAt], g.[UpdatedAt]
+         FROM [Books] AS b
+         INNER JOIN [BookAuthors] AS ba ON b.[BookId] = ba.[BookId]
+         INNER JOIN [Authors] AS a ON ba.[AuthorId] = a.[AuthorId]
+         LEFT JOIN [BookGenres] AS bg ON b.[BookId] = bg.[BookId]
+         LEFT JOIN [Genres] AS g ON bg.[GenreId] = g.[GenreId]WHERE EXISTS (
+            SELECT 1
+            FROM [BookAuthors] AS ba2
+            WHERE ba2.[BookId] = b.[BookId] 
+              AND ba2.[AuthorId] = @authorId
+        )
+        ORDER BY b.[BookId], ba.[AuthorId], bg.[GenreId] 
+    */
     public async Task<IEnumerable<Book>> GetByAuthorAsync(int authorId)
     {
         return await _context.Books

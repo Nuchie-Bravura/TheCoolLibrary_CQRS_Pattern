@@ -1,6 +1,6 @@
 ﻿using Asp.Versioning;
-using CoolLibrary.Application.DTO;
-using CoolLibrary.Application.Services;
+using CoolLibrary.Application.DTO.Authentication;
+using CoolLibrary.Application.Services.Token;
 using CoolLibrary.Domain.Entities;
 using CoolLibrary.Domain.Enums;
 using CoolLibrary.Infrastructure.Data;
@@ -108,8 +108,8 @@ public class AuthController : ControllerBase
                 UserName = registerDto.Email,
                 Email = registerDto.Email,
                 EmailConfirmed = true,
-                FirstName = registerDto.FirstName,   // ← NEW
-                LastName = registerDto.LastName,     // ← NEW
+                FirstName = registerDto.FirstName,  
+                LastName = registerDto.LastName,     
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

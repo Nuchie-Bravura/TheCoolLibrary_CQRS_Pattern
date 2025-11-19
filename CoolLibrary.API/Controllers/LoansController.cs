@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
-using CoolLibrary.Application.DTO;
-using CoolLibrary.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Asp.Versioning;
 using System.Security.Claims;
+using CoolLibrary.Application.Services.LoansAndReservations;
+using CoolLibrary.Application.DTO.LoansAndReservations;
 
 namespace CoolLibrary.API.Controllers;
 

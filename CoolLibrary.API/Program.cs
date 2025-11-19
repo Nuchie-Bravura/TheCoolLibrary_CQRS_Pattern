@@ -14,12 +14,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApiServices();
 
 // =====================
-// 2. Infrastructure Layer {EFCore + Identity + Repositories Types}
+// 2. Infrastructure Layer {EFCore + Identity + Repositories Types} blob storage connection string
 // =====================
 builder.Services.AddInfrastructureServices(builder.Configuration.GetConnectionString("DefaultConnection"));
 
 // =====================
-// 3. Application Layer {AutoMapper , Service complex use cases [LoanRequest , Token] }
+// 3. Application Layer {AutoMapper , Service complex use cases [LoanRequest , Token, Create/Delete Authors or Books] }
 // =====================
 builder.Services.AddApplicationServices();
 

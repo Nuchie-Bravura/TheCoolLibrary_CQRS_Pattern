@@ -1,9 +1,10 @@
-﻿using AutoMapper;
-using CoolLibrary.Application.DTO;
-using CoolLibrary.Domain.Contracts;
-using Microsoft.AspNetCore.Mvc;
+﻿using Asp.Versioning;
+using CoolLibrary.Application.DTO.Book;
+using CoolLibrary.Application.Services.Books;
 using Microsoft.AspNetCore.Authorization;
-using Asp.Versioning;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+
 
 namespace CoolLibrary.API.Controllers;
 
@@ -19,15 +20,15 @@ namespace CoolLibrary.API.Controllers;
 [ApiVersion("1.0")]  // ← This controller belongs to API v1.0
 public class BooksController : ControllerBase
 {
-    private readonly IBooks _booksRepository;
-    private readonly ILogger<BooksController> _logger;
-    private readonly IMapper _mapper;
+    private readonly CreateBookService _createBookService;
+    private readonly GetAllBooksService _getAllBooksService;    
+    private readonly DeleteBookService _deleteBookService;
 
-    public BooksController(IBooks booksRepository, ILogger<BooksController> logger, IMapper mapper)
+    public BooksController(  CreateBookService createBookService, GetAllBooksService getAllBooksService, DeleteBookService deleteBookService)
     {
-        _booksRepository = booksRepository;
-        _logger = logger;
-        _mapper = mapper;
+        _getAllBooksService = getAllBooksService;
+        _deleteBookService = deleteBookService;
+        _createBookService = createBookService;
     }
 
     /// <summary>
@@ -59,16 +60,96 @@ public class BooksController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<BookDTO>>> GetAll()
     {
-        try
-        {
-            var books = await _booksRepository.GetAllAsync();
-            var bookDTOs = _mapper.Map<IEnumerable<BookDTO>>(books);
-            return Ok(bookDTOs);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving all books");
-            return StatusCode(500, "An error occurred while retrieving books");
-        }
+        var books = await _getAllBooksService.ExecuteAsync();
+        return Ok(books);
     }
+
+    /// <summary>
+    /// Gets a specific book by ID
+    /// </summary>
+    /// <param name="id">The book ID</param>
+    /// <returns>Book details</returns>
+    /// <response code="200">Returns the book successfully</response>
+    /// <response code="404">Book not found</response>
+    /// <response code="500">Internal server error occurred</response>
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(BookDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> GetById(int bookID)
+    {
+         var book = await _getAllBooksService.GetByIdAsync(bookID);
+         return Ok(book);
+    }
+
+
+    /// <summary>
+    /// Allows Admin User to Create New Book , Author(s) need to exists
+    /// </summary>
+    /// <remarks>
+    /// Returns HTTP link to created Book. hateOAS can be used to get the created book details.
+    /// 
+    /// 
+    /// Response Sample:
+    /// 
+    ///     POST /api/books/AddNewBook
+    ///     [
+    ///         {
+    ///             "Title": "New Book Title",
+    ///             "ISBN": "978-3-16-148410-0",
+    ///             "Description": "",
+    ///             "PageCount": 300,
+    ///             "TotalCopies": 5,
+    ///             "AvailableCopies": 5,
+    ///             "CoverPhotoURL": "",
+    ///             "Language": "English",
+    ///             "Publisher": "JC",
+    ///             "PublicationDate": "2023-01-01", 
+    ///             "Authors": [ Id:3]
+    ///         }
+    ///     ]
+    ///
+    /// </remarks>
+    /// <returns>HTTP Link</returns>
+    /// <response code="200">Returns the http link of recently created book</response>
+    /// <response code="500">Internal server error occurred</response>
+    /// </remarks>
+    /// <returns>HTTP Link</returns>
+    /// <response code="200">Returns the http link of recently created book<response>
+    /// <response code="500">Internal server error occurred</response>
+
+    [HttpPost("AddNewBook")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<BookDTO>> CreateNewBookEntry([FromForm] CreateBookRequestDTO createBookRequestDTO)
+    {
+        var createdBook = await _createBookService.ExecuteAsync(createBookRequestDTO);
+        return CreatedAtAction(nameof(GetById), new { id = createdBook.BookId, version = "1.0" }, createdBook);
+    }
+
+    /// <summary>
+    /// Deletes a book by ID
+    /// deletes the book identified by the given ID from the library catalog.
+    ///     deletes blob from storage if exists
+    ///     deletes book record from database
+    /// </summary>
+    /// <param name="bookId">The ID of the book to delete</param>
+    /// <returns>NoContent if successful</returns>
+    /// <response code="204">NoContent if successful</response>
+    /// <response code="404">NotFound if the book does not exist</response>
+    /// 
+    [HttpDelete("{bookId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Authorize(Roles = "Admin")]
+
+    public async Task<IActionResult> DeleteBook(int bookId)
+    {
+        await _deleteBookService.SafeBookDeleteAsync(bookId);
+        return NoContent();
+    }
+
+
 }
