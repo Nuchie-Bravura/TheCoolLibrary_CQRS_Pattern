@@ -17,7 +17,7 @@ builder.Services.AddApiServices();
 // =====================
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not configured.");
-builder.Services.AddInfrastructureServices(connectionString);
+builder.Services.AddInfrastructureServices(connectionString, builder.Configuration);
 
 // =====================
 // 3. Application Layer {AutoMapper , Service complex use cases [LoanRequest , Token, Create/Delete Authors or Books] }

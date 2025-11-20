@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Asp.Versioning;
 using CoolLibrary.Application.DTO.Customer;
+using CoolLibrary.Application.Services.Cache;
 
 namespace CoolLibrary.API.Controllers;
 
@@ -23,12 +24,18 @@ public class CustomersController : ControllerBase
     private readonly ICustomers _customersRepository;
     private readonly ILogger<CustomersController> _logger;
     private readonly IMapper _mapper;
+    private readonly ICacheService _cacheService;
 
-    public CustomersController(ICustomers customersRepository, ILogger<CustomersController> logger, IMapper mapper)
+    public CustomersController(
+        ICustomers customersRepository, 
+        ILogger<CustomersController> logger, 
+        IMapper mapper,
+        ICacheService cacheService)
     {
         _customersRepository = customersRepository;
         _logger = logger;
         _mapper = mapper;
+        _cacheService = cacheService;
     }
 
 
@@ -56,10 +63,17 @@ public class CustomersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetAll()
     {
+        const string cacheKey = "customers:all";
+
         try
         {
-            var customers = await _customersRepository.GetAllAsync();
-            var customerDTOs = _mapper.Map<IEnumerable<CustomerDTO>>(customers);
+            var customerDTOs = await _cacheService.GetOrSetAsync(cacheKey, async () =>
+            {
+                _logger.LogInformation("Cache miss for {CacheKey}, fetching from database", cacheKey);
+                var customers = await _customersRepository.GetAllAsync();
+                return _mapper.Map<IEnumerable<CustomerDTO>>(customers);
+            });
+
             return Ok(customerDTOs);
         }
         catch (Exception ex)
