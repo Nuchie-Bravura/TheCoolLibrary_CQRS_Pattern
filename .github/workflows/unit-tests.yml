@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [ main ]        
 
+# Add permissions for pull request checks
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  statuses: write
+
 jobs:
   unit-tests:
     name: Run Unit Tests (.NET 9)
@@ -37,12 +44,13 @@ jobs:
       run: dotnet build --no-restore --configuration Release
 
     - name: 🧪 Run CreateBookService Tests
-      run: dotnet test CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
-            --no-build \
-            --configuration Release \
-            --verbosity detailed \
-            --logger "console;verbosity=detailed" \
-            --filter "FullyQualifiedName~CreateBookServiceTests"
+      run: |
+        dotnet test CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
+          --no-build \
+          --configuration Release \
+          --verbosity detailed \
+          --logger "console;verbosity=detailed" \
+          --filter "FullyQualifiedName~CreateBookServiceTests"
 
     - name: 🧪 Run All Unit Tests with Coverage
       run: |
@@ -56,11 +64,13 @@ jobs:
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: '1'
 
-    - name: 📊 Test Summary
-      uses: test-summary/action@v2
+    - name: 📊 Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
       with:
-        paths: "TestResults/**/*.trx"
+        files: '**/test-results.trx'
+        check_name: 'Unit Test Results'
+        comment_mode: off
 
     - name: 🔎 Show TestResults & Coverage files (debug)
       if: always()
