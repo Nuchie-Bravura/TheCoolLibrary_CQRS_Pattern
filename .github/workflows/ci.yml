@@ -1,0 +1,73 @@
+﻿name: .NET CI/CD
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  statuses: write
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔧 Setup .NET 9.0
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+    
+    - name: 📦 Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    - name: 📚 Restore dependencies
+      run: dotnet restore
+    
+    - name: 🏗️ Build solution
+      run: dotnet build --configuration Release --no-restore --warnaserror
+    
+    - name: 🧪 Run unit tests
+      run: |
+        dotnet test CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
+          --configuration Release \
+          --no-build \
+          --verbosity normal \
+          --logger "trx;LogFileName=test-results.trx" \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./TestResults
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+    
+    - name: 📊 Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: 'TestResults/**/*.trx'
+        check_name: 'MSTest Results'
+        comment_mode: off
+    
+    - name: 📈 Code Coverage Report
+      uses: codecov/codecov-action@v4
+      if: always()
+      continue-on-error: true
+      with:
+        directory: ./TestResults
+        files: '**/coverage.cobertura.xml'
+        fail_ci_if_error: false
+        verbose: true
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

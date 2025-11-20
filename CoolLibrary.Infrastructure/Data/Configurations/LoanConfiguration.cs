@@ -12,6 +12,14 @@ public class LoanConfiguration : IEntityTypeConfiguration<Loan>
 {
     public void Configure(EntityTypeBuilder<Loan> builder)
     {
+        // Table configuration with check constraints
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_Loans_RenewalCount", "[RenewalCount] >= 0");
+            t.HasCheckConstraint("CK_Loans_LateFee", "[LateFee] >= 0");
+            t.HasCheckConstraint("CK_Loans_ReturnDate", "[ReturnDate] IS NULL OR [ReturnDate] >= [LoanDate]");
+        });
+
         // Primary key
         builder.HasKey(l => l.LoanId);
         
@@ -75,10 +83,5 @@ public class LoanConfiguration : IEntityTypeConfiguration<Loan>
         // Ignore computed properties
         builder.Ignore(l => l.IsOverdue);
         builder.Ignore(l => l.DaysOverdue);
-        
-        // Check constraints
-        builder.HasCheckConstraint("CK_Loans_RenewalCount", "[RenewalCount] >= 0");
-        builder.HasCheckConstraint("CK_Loans_LateFee", "[LateFee] >= 0");
-        builder.HasCheckConstraint("CK_Loans_ReturnDate", "[ReturnDate] IS NULL OR [ReturnDate] >= [LoanDate]");
     }
 }

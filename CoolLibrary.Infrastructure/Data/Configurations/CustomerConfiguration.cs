@@ -13,6 +13,12 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 {
     public void Configure(EntityTypeBuilder<Customer> builder)
     {
+        // Table configuration with check constraints
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_Customers_MaxBooksAllowed", "[MaxBooksAllowed] > 0");
+        });
+
         // Primary key
         builder.HasKey(c => c.CustomerId);
 
@@ -77,8 +83,5 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         builder.Ignore(c => c.Email);
         builder.Ignore(c => c.CurrentLoanCount);
         builder.Ignore(c => c.CanBorrowMoreBooks);
-        
-        // Check constraints
-        builder.HasCheckConstraint("CK_Customers_MaxBooksAllowed", "[MaxBooksAllowed] > 0");
     }
 }

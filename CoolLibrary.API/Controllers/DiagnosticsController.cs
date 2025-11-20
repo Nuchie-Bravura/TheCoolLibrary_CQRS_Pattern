@@ -67,18 +67,24 @@ public class DiagnosticsController : ControllerBase
             AdminUser = new
             {
                 Exists = await _userManager.FindByEmailAsync("admin@fake.com") != null,
-                Details = (await _userManager.FindByEmailAsync("admin@fake.com")) != null
-                    ? new
-                    {
-                        Email = "admin@fake.com",
-                        HasAdminRole = await _userManager.IsInRoleAsync(
-                            await _userManager.FindByEmailAsync("admin@fake.com"), "Admin")
-                    }
-                    : null
+                Details = await GetAdminUserDetailsAsync()
             }
         };
 
         return Ok(result);
+    }
+
+    private async Task<object?> GetAdminUserDetailsAsync()
+    {
+        var user = await _userManager.FindByEmailAsync("admin@fake.com");
+        if (user == null) return null;
+
+        var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+        return new
+        {
+            Email = "admin@fake.com",
+            HasAdminRole = isAdmin
+        };
     }
 
     /// <summary>

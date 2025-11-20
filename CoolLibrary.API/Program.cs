@@ -1,5 +1,4 @@
-﻿
-using CoolLibrary.API;
+﻿using CoolLibrary.API;
 using CoolLibrary.API.Extensions;
 using CoolLibrary.Application.Extensions;
 using CoolLibrary.Infrastructure.Data;
@@ -16,7 +15,9 @@ builder.Services.AddApiServices();
 // =====================
 // 2. Infrastructure Layer {EFCore + Identity + Repositories Types} blob storage connection string
 // =====================
-builder.Services.AddInfrastructureServices(builder.Configuration.GetConnectionString("DefaultConnection"));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not configured.");
+builder.Services.AddInfrastructureServices(connectionString);
 
 // =====================
 // 3. Application Layer {AutoMapper , Service complex use cases [LoanRequest , Token, Create/Delete Authors or Books] }

@@ -12,6 +12,12 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
 {
     public void Configure(EntityTypeBuilder<Reservation> builder)
     {
+        // Table configuration with check constraints
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_Reservations_ExpirationDate", "[ExpirationDate] >= [ReservationDate]");
+        });
+
         // Primary key
         builder.HasKey(r => r.ReservationId);
         
@@ -65,8 +71,5 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
         
         // Ignore computed properties
         builder.Ignore(r => r.IsExpired);
-        
-        // Check constraints
-        builder.HasCheckConstraint("CK_Reservations_ExpirationDate", "[ExpirationDate] >= [ReservationDate]");
     }
 }

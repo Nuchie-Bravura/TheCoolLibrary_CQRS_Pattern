@@ -67,7 +67,7 @@ public class BooksController : ControllerBase
     /// <summary>
     /// Gets a specific book by ID
     /// </summary>
-    /// <param name="id">The book ID</param>
+    /// <param name="bookID">The book ID</param>
     /// <returns>Book details</returns>
     /// <response code="200">Returns the book successfully</response>
     /// <response code="404">Book not found</response>
@@ -111,13 +111,9 @@ public class BooksController : ControllerBase
     ///
     /// </remarks>
     /// <returns>HTTP Link</returns>
-    /// <response code="200">Returns the http link of recently created book</response>
+    /// <response code="201">Returns the http link of recently created book</response>
+    /// <response code="400">Bad request</response>
     /// <response code="500">Internal server error occurred</response>
-    /// </remarks>
-    /// <returns>HTTP Link</returns>
-    /// <response code="200">Returns the http link of recently created book<response>
-    /// <response code="500">Internal server error occurred</response>
-
     [HttpPost("AddNewBook")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
