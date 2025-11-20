@@ -1,0 +1,61 @@
+﻿name: Unit Tests
+
+on:
+  push:
+    branches: [ main ]          # se ejecuta al hacer push/merge a main
+  pull_request:
+    branches: [ main ]          # se ejecuta en PRs hacia main
+
+jobs:
+  unit-tests:
+    name: Run Unit Tests (.NET 9)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🔧 Setup .NET 9
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: 📦 Restore dependencies
+      run: dotnet restore
+
+    - name: 🏗️ Build
+      run: dotnet build --no-restore --configuration Release
+
+    - name: 🧪 Run CreateBookService Tests
+      run: dotnet test CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
+            --no-build \
+            --configuration Release \
+            --verbosity detailed \
+            --logger "console;verbosity=detailed" \
+            --filter "FullyQualifiedName~CreateBookServiceTests"
+
+    - name: 🧪 Run All Unit Tests with Coverage
+      run: dotnet test CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
+            --no-build \
+            --configuration Release \
+            --verbosity normal \
+            --logger "trx;LogFileName=test-results.trx" \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults
+
+    - name: 📊 Test Summary
+      uses: test-summary/action@v2
+      if: always()
+      with:
+        paths: "TestResults/**/*.trx"
+
+    - name: 📈 Upload Coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: always()
+      with:
+        directory: ./TestResults
+        files: '*/coverage.cobertura.xml'
+        fail_ci_if_error: false
+        verbose: true

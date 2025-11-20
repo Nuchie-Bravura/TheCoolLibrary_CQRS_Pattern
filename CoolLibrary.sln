@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolLibrary.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolLibrary.API", "CoolLibrary.API\CoolLibrary.API.csproj", "{A7CA5BED-7A3F-46A1-A4AD-A96E0A936432}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolLibraryTests", "CoolLibraryTests\CoolLibraryTests.csproj", "{127E4452-F338-4159-AF46-150DAF132019}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolLibraryUnitaryTests", "CoolLibraryTests\CoolLibraryUnitaryTests.csproj", "{127E4452-F338-4159-AF46-150DAF132019}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
