@@ -24,7 +24,7 @@ jobs:
     - name: 🔧 Setup .NET 9.0
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.x'
+        global-json-file: global.json
     
     - name: 📦 Cache NuGet packages
       uses: actions/cache@v4
@@ -56,7 +56,7 @@ jobs:
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
       with:
-        files: '**/test-results.trx'
+        files: 'TestResults/**/*.trx'
         check_name: 'MSTest Results'
         comment_mode: off
     

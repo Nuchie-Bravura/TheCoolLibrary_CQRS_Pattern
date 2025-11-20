@@ -11,6 +11,12 @@ public class BookAuthorConfiguration : IEntityTypeConfiguration<BookAuthor>
 {
     public void Configure(EntityTypeBuilder<BookAuthor> builder)
     {
+        // Table configuration with check constraints
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_BookAuthors_AuthorOrder", "[AuthorOrder] > 0");
+        });
+
         // Composite primary key
         builder.HasKey(ba => new { ba.BookId, ba.AuthorId });
         
@@ -39,8 +45,5 @@ public class BookAuthorConfiguration : IEntityTypeConfiguration<BookAuthor>
             
         builder.HasIndex(ba => new { ba.BookId, ba.AuthorOrder })
             .HasDatabaseName("IX_BookAuthors_BookId_AuthorOrder");
-        
-        // Check constraints
-        builder.HasCheckConstraint("CK_BookAuthors_AuthorOrder", "[AuthorOrder] > 0");
     }
 }

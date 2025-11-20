@@ -11,6 +11,13 @@ public class BookConfiguration : IEntityTypeConfiguration<Book>
 {
     public void Configure(EntityTypeBuilder<Book> builder)
     {
+        // Table configuration with check constraints
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_Books_CopyCount", "[AvailableCopies] <= [TotalCopies]");
+            t.HasCheckConstraint("CK_Books_PositiveCopies", "[AvailableCopies] >= 0 AND [TotalCopies] >= 0");
+        });
+
         // Primary key
         builder.HasKey(b => b.BookId);
         
@@ -69,9 +76,5 @@ public class BookConfiguration : IEntityTypeConfiguration<Book>
         // Ignore computed properties
         builder.Ignore(b => b.IsValidCopyCount);
         builder.Ignore(b => b.IsAvailable);
-        
-        // Check constraints
-        builder.HasCheckConstraint("CK_Books_CopyCount", "[AvailableCopies] <= [TotalCopies]");
-        builder.HasCheckConstraint("CK_Books_PositiveCopies", "[AvailableCopies] >= 0 AND [TotalCopies] >= 0");
     }
 }

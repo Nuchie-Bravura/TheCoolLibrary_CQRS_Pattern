@@ -12,6 +12,13 @@ public class FineConfiguration : IEntityTypeConfiguration<Fine>
 {
     public void Configure(EntityTypeBuilder<Fine> builder)
     {
+        // Table configuration with check constraints
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_Fines_Amount", "[Amount] > 0");
+            t.HasCheckConstraint("CK_Fines_PaidDate", "[PaidDate] IS NULL OR [PaidDate] >= [IssueDate]");
+        });
+
         // Primary key
         builder.HasKey(f => f.FineId);
         
@@ -70,9 +77,5 @@ public class FineConfiguration : IEntityTypeConfiguration<Fine>
         
         // Ignore computed properties
         builder.Ignore(f => f.IsOutstanding);
-        
-        // Check constraints
-        builder.HasCheckConstraint("CK_Fines_Amount", "[Amount] > 0");
-        builder.HasCheckConstraint("CK_Fines_PaidDate", "[PaidDate] IS NULL OR [PaidDate] >= [IssueDate]");
     }
 }
