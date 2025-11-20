@@ -2,9 +2,9 @@
 
 on:
   push:
-    branches: [ main ]          # se ejecuta al hacer push/merge a main
+    branches: [ main ]         
   pull_request:
-    branches: [ main ]          # se ejecuta en PRs hacia main
+    branches: [ main ]        
 
 jobs:
   unit-tests:
@@ -22,7 +22,15 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
-    - name: 📦 Restore dependencies
+    - name: 📦 Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: 📚 Restore dependencies
       run: dotnet restore
 
     - name: 🏗️ Build
@@ -37,13 +45,16 @@ jobs:
             --filter "FullyQualifiedName~CreateBookServiceTests"
 
     - name: 🧪 Run All Unit Tests with Coverage
-      run: dotnet test CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
-            --no-build \
-            --configuration Release \
-            --verbosity normal \
-            --logger "trx;LogFileName=test-results.trx" \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./TestResults
+      run: |
+        dotnet test CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
+          --no-build \
+          --configuration Release \
+          --verbosity normal \
+          --logger "trx;LogFileName=test-results.trx" \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./TestResults
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: '1'
 
     - name: 📊 Test Summary
       uses: test-summary/action@v2
@@ -51,11 +62,22 @@ jobs:
       with:
         paths: "TestResults/**/*.trx"
 
-    - name: 📈 Upload Coverage to Codecov
-      uses: codecov/codecov-action@v4
+    - name: 🔎 Show TestResults & Coverage files (debug)
       if: always()
+      run: |
+        echo "List TestResults:"
+        find ./TestResults -maxdepth 3 -type f -print || true
+        echo "Find coverage files:"
+        find . -type f -name "coverage.cobertura.xml" -print || true
+
+    - name: 📈 Upload Coverage to Codecov
+      if: always()
+      uses: codecov/codecov-action@v4
+      continue-on-error: true
       with:
         directory: ./TestResults
-        files: '*/coverage.cobertura.xml'
+        files: '**/coverage.cobertura.xml'
         fail_ci_if_error: false
         verbose: true
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
