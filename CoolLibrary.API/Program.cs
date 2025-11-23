@@ -3,6 +3,7 @@ using CoolLibrary.API.Extensions;
 using CoolLibrary.Application.Extensions;
 using CoolLibrary.Infrastructure.Data;
 using CoolLibrary.Infrastructure.Extensions;
+using AspNetCoreRateLimit;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +37,11 @@ builder.Configuration.AddAzureKeyVaultIfConfigured(builder.Environment);
 // =====================
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
+
+// =====================
+// 6. Redis Rate Limiting {20 requests per minute per IP}
+// =====================
+builder.Services.AddRedisRateLimiting(builder.Configuration);
 
 var app = builder.Build();
 
@@ -86,6 +92,9 @@ app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Client Rate Limiting Middleware (IP for anonymous, UserID for authenticated - must be after UseAuthentication)
+app.UseClientRateLimiting();
 
 // Health checks + Controllers
 app.MapHealthChecks("/healthz");

@@ -163,11 +163,6 @@ namespace CoolLibrary.Infrastructure.Migrations
                     b.HasIndex("LastName", "FirstName")
                         .HasDatabaseName("IX_Authors_Name");
 
-                    b.HasIndex("NormalizedFullName", "BirthDate")
-                        .IsUnique()
-                        .HasDatabaseName("UX_Author_NormalizedFullName_BirthDate")
-                        .HasFilter("[BirthDate] IS NOT NULL");
-
                     b.ToTable("Authors");
 
                     b.HasData(

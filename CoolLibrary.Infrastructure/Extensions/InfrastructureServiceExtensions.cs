@@ -28,7 +28,7 @@ namespace CoolLibrary.Infrastructure.Extensions
                     .AddRoles<IdentityRole>()
                     .AddEntityFrameworkStores<LibraryDbContext>();
 
-            // Redis Cache (con fallback a InMemory para desarrollo)
+            // Redis Cache (including fallback to InMemory for development)
             var redisConnection = configuration.GetConnectionString("Redis");
             
             if (!string.IsNullOrEmpty(redisConnection) && redisConnection != "disabled")
