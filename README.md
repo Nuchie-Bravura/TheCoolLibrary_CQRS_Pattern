@@ -151,9 +151,7 @@ Domain has no dependencies.
 - AutoMapper
 - FluentValidation
 - Swashbuckle (Swagger/OpenAPI)
-- Confluent.Kafka
-- OpenTelemetry
-- Prometheus
+- Redis RateLimit & Cache
 
 ### **Database**
 - SQL Server
