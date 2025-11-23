@@ -1,6 +1,4 @@
-Aquí lo tienes **listo para copiar y pegar** directamente en tu **README.md**, sin explicaciones adicionales.
 
----
 
 ```markdown
 # 📚 CoolLibrary — Library Management System  
