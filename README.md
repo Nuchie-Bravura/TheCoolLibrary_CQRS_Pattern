@@ -150,8 +150,11 @@ Domain has no dependencies.
 - Entity Framework Core 9
 - AutoMapper
 - FluentValidation
+- Azzure Secrets & Blob Storage
+- Extenstion Methods on Lawyers to simplify program.cs readability
 - Swashbuckle (Swagger/OpenAPI)
 - Redis RateLimit & Cache
+- Moq & FluentAssertions &  AAA (Arrange-Act-Assert) pattern
 
 ### **Database**
 - SQL Server
