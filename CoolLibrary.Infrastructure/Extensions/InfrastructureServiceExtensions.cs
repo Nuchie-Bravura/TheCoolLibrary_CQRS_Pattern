@@ -19,9 +19,19 @@ namespace CoolLibrary.Infrastructure.Extensions
             string connectionString, 
             IConfiguration configuration)
         {
-            // DbContext
-            services.AddDbContext<LibraryDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            // DbContext - Use InMemory for Testing environment, SQL Server for others
+            var environment = configuration["ASPNETCORE_ENVIRONMENT"] ?? configuration["DOTNET_ENVIRONMENT"];
+            
+            if (environment == "Testing" || connectionString == "InMemory")
+            {
+                services.AddDbContext<LibraryDbContext>(options =>
+                    options.UseInMemoryDatabase("CoolLibraryTestDb"));
+            }
+            else
+            {
+                services.AddDbContext<LibraryDbContext>(options =>
+                    options.UseSqlServer(connectionString));
+            }
 
             // Identity
             services.AddIdentityCore<ApplicationUser>()

@@ -3,7 +3,6 @@ using CoolLibrary.API.Extensions;
 using CoolLibrary.Application.Extensions;
 using CoolLibrary.Infrastructure.Data;
 using CoolLibrary.Infrastructure.Extensions;
-using AspNetCoreRateLimit;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,30 +37,29 @@ builder.Configuration.AddAzureKeyVaultIfConfigured(builder.Environment);
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
-// =====================
-// 6. Redis Rate Limiting {20 requests per minute per IP}
-// =====================
-builder.Services.AddRedisRateLimiting(builder.Configuration);
-
 var app = builder.Build();
 
 // =====================
 // 6. Seed Database
 // =====================
-using (var scope = app.Services.CreateScope())
+// Skip seeding in Testing environment (used by integration tests)
+if (!app.Environment.IsEnvironment("Testing"))
 {
-    var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
-    try
+    using (var scope = app.Services.CreateScope())
     {
-        logger.LogInformation("Seeding database...");
-        await DatabaseSeeder.SeedAsync(services);
-        logger.LogInformation("Database seeding completed!");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error seeding database");
-        throw;
+        var services = scope.ServiceProvider;
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        try
+        {
+            logger.LogInformation("Seeding database...");
+            await DatabaseSeeder.SeedAsync(services);
+            logger.LogInformation("Database seeding completed!");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error seeding database");
+            throw;
+        }
     }
 }
 
@@ -93,11 +91,10 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Client Rate Limiting Middleware (IP for anonymous, UserID for authenticated - must be after UseAuthentication)
-app.UseClientRateLimiting();
-
 // Health checks + Controllers
 app.MapHealthChecks("/healthz");
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { } // For integration testing purposes
