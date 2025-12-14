@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CoolLibrary.Infrastructure.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    [Migration("20251112224432_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251214121848_InitialCreateWithSeeding")]
+    partial class InitialCreateWithSeeding
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -165,11 +165,6 @@ namespace CoolLibrary.Infrastructure.Migrations
 
                     b.HasIndex("LastName", "FirstName")
                         .HasDatabaseName("IX_Authors_Name");
-
-                    b.HasIndex("NormalizedFullName", "BirthDate")
-                        .IsUnique()
-                        .HasDatabaseName("UX_Author_NormalizedFullName_BirthDate")
-                        .HasFilter("[BirthDate] IS NOT NULL");
 
                     b.ToTable("Authors");
 

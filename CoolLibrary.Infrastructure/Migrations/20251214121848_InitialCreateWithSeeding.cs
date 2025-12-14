@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoolLibrary.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialCreateWithSeeding : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -658,13 +658,6 @@ namespace CoolLibrary.Infrastructure.Migrations
                 name: "IX_Authors_Name",
                 table: "Authors",
                 columns: new[] { "LastName", "FirstName" });
-
-            migrationBuilder.CreateIndex(
-                name: "UX_Author_NormalizedFullName_BirthDate",
-                table: "Authors",
-                columns: new[] { "NormalizedFullName", "BirthDate" },
-                unique: true,
-                filter: "[BirthDate] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BookAuthors_AuthorId",
