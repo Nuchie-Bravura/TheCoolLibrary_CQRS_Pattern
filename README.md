@@ -155,6 +155,7 @@ Domain has no dependencies.
 - Swashbuckle (Swagger/OpenAPI)
 - Redis RateLimit & Cache
 - Moq & FluentAssertions &  AAA (Arrange-Act-Assert) pattern
+- GraphQL {just query} Hot chocolate & banana cake
 
 ### **Database**
 - SQL Server
