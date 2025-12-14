@@ -34,8 +34,42 @@ namespace CoolLibrary.API.Extensions
             services.AddSwaggerGen(options =>
             {
                 var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+                var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFilename);
                 options.IncludeXmlComments(xmlPath);
+
+                // Configuración de metadatos de la API
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "CoolLibrary API",
+                    Version = "v1",
+                    Description = @"
+                        ## 📚 CoolLibrary REST API
+                        
+                        This is the RESTful API for the CoolLibrary system.
+                        
+                        ### 🚀 Alternative: GraphQL API
+                        
+                        **GraphQL Endpoint:** `/graphql`
+                        
+                        For flexible queries and real-time data fetching, you can use our GraphQL API:
+                        - **GraphQL Playground:** [https://localhost:7182/graphql](https://localhost:7182/graphql)
+                        - **Documentation:** Interactive schema explorer available in the playground
+                        - **Single endpoint:** All queries through POST to `/graphql`
+                        
+                        ### 🔐 Authentication
+                        
+                        Both REST and GraphQL APIs use JWT Bearer tokens for authentication.
+                    ",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "CoolLibrary API Support",
+                        Email = "support@coollibrary.com"
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "MIT License"
+                    }
+                });
 
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {

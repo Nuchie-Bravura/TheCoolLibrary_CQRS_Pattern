@@ -1,6 +1,7 @@
 ﻿using CoolLibrary.API;
 using CoolLibrary.API.Extensions;
 using CoolLibrary.Application.Extensions;
+using CoolLibrary.Application.GraphQL.Queries;
 using CoolLibrary.Infrastructure.Data;
 using CoolLibrary.Infrastructure.Extensions;
 
@@ -25,14 +26,28 @@ builder.Services.AddInfrastructureServices(connectionString, builder.Configurati
 builder.Services.AddApplicationServices();
 
 // =====================
-// 4. Azure Key Vault (opcional)
+// 4. GraphQL Configuration
+// =====================
+builder.Services
+    .AddGraphQLServer()
+    .AddQueryType(d => d.Name("Query"))
+    .AddTypeExtension<AuthorQueries>()
+    .AddTypeExtension<CustomerQueries>()
+    .AddTypeExtension<BookQueries>()
+    .AddTypeExtension<GenreQueries>()
+    .AddProjections()
+    .AddFiltering()
+    .AddSorting();
+
+// =====================
+// 5. Azure Key Vault (opcional)
 // =====================
 
 builder.Configuration.AddAzureKeyVaultIfConfigured(builder.Environment);
 
 
 // =====================
-// 5. JWT Authentication
+// 6. JWT Authentication
 // =====================
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -40,7 +55,7 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 var app = builder.Build();
 
 // =====================
-// 6. Seed Database
+// 7. Seed Database
 // =====================
 // Skip seeding in Testing environment (used by integration tests)
 if (!app.Environment.IsEnvironment("Testing"))
@@ -64,8 +79,12 @@ if (!app.Environment.IsEnvironment("Testing"))
 }
 
 // =====================
-// 7. Middleware
+// 8. Middleware
 // =====================
+
+// Archivos estáticos (HTML de bienvenida)
+app.UseStaticFiles();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -76,8 +95,8 @@ if (app.Environment.IsDevelopment())
         {
             c.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", $"CoolLibrary API {description.GroupName}");
         }
-        c.RoutePrefix = string.Empty;
-        c.DocumentTitle = "CoolLibrary API";
+        c.RoutePrefix = "swagger"; // Swagger ahora está en /swagger, no en la raíz
+        c.DocumentTitle = "CoolLibrary API - Swagger";
         c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
         c.DisplayRequestDuration();
         c.EnableFilter();
@@ -90,6 +109,11 @@ app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// =====================
+// 9. GraphQL Endpoint
+// =====================
+app.MapGraphQL("/graphql");
 
 // Health checks + Controllers
 app.MapHealthChecks("/healthz");

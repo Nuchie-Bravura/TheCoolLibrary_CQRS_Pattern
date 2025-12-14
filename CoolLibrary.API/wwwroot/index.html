@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoolLibrary API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .api-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .icon {
+            font-size: 1.5em;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-right: 10px;
+            margin-top: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .button.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .features {
+            list-style: none;
+            margin-top: 15px;
+        }
+        
+        .features li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 CoolLibrary API</h1>
+        <p class="subtitle">Choose your preferred API interface</p>
+        
+        <!-- REST API Section -->
+        <div class="api-section">
+            <h2>
+                <span class="icon">🔷</span>
+                REST API
+                <span class="badge">Traditional</span>
+            </h2>
+            <p>Standard RESTful endpoints with Swagger documentation</p>
+            <ul class="features">
+                <li>Multiple endpoints for different resources</li>
+                <li>Standard HTTP methods (GET, POST, PUT, DELETE)</li>
+                <li>Complete Swagger/OpenAPI documentation</li>
+                <li>Easy to understand and use</li>
+            </ul>
+            <a href="/swagger" class="button">📄 Open Swagger Docs</a>
+            <a href="/api/info" class="button secondary">ℹ️ API Info</a>
+        </div>
+        
+        <!-- GraphQL Section -->
+        <div class="api-section">
+            <h2>
+                <span class="icon">⚡</span>
+                GraphQL API
+                <span class="badge">Flexible</span>
+            </h2>
+            <p>Query exactly what you need with our GraphQL endpoint</p>
+            <ul class="features">
+                <li>Single endpoint for all queries</li>
+                <li>Request only the data you need</li>
+                <li>Interactive schema explorer (Banana Cake Pop)</li>
+                <li>Real-time validation and autocomplete</li>
+            </ul>
+            <a href="/graphql" class="button">🍌 Open GraphQL Playground</a>
+            
+            <div class="code-block">
+Example Query:
+
+{
+  authors {
+    firstName
+    lastName
+    bookAuthors {
+      book {
+        title
+        bookGenres {
+          genre { name }
+        }
+      }
+    }
+  }
+}
+            </div>
+        </div>
+        
+        <!-- Health Check -->
+        <div style="text-align: center; margin-top: 20px; color: #666;">
+            <p>Health Check: <a href="/healthz" style="color: #667eea; text-decoration: none;">✓ /healthz</a></p>
+        </div>
+    </div>
+</body>
+</html>
