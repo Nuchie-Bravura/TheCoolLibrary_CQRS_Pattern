@@ -23,7 +23,7 @@ public class CustomerType : ObjectType<Customer>
             {
                 var customer = ctx.Parent<Customer>();
                 return customer.Fines?
-                    .Where(f => f.Status == FineStatus.Unpaid)
+                    .Where(f => f.Status == FineStatus.Pending)  // ? CORREGIDO
                     .Sum(f => f.Amount) ?? 0m;
             });
         
@@ -48,7 +48,7 @@ public class CustomerType : ObjectType<Customer>
             {
                 var customer = ctx.Parent<Customer>();
                 var activeLoans = customer.Loans?.Count(l => l.Status == LoanStatus.Active) ?? 0;
-                var hasOverdueFines = customer.Fines?.Any(f => f.Status == FineStatus.Unpaid) ?? false;
+                var hasOverdueFines = customer.Fines?.Any(f => f.Status == FineStatus.Pending) ?? false;  // ? CORREGIDO
                 
                 return !hasOverdueFines && 
                        activeLoans < customer.MaxBooksAllowed && 
