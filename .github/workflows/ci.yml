@@ -42,7 +42,7 @@ jobs:
     
     - name: 🧪 Run unit tests
       run: |
-        dotnet test CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
+        dotnet test tests/CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
           --configuration Release \
           --no-build \
           --verbosity normal \

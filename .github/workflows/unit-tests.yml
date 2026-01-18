@@ -45,7 +45,7 @@ jobs:
 
     - name: 🧪 Run CreateBookService Tests
       run: |
-        dotnet test CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
+        dotnet test tests/CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
           --no-build \
           --configuration Release \
           --verbosity detailed \
@@ -54,7 +54,7 @@ jobs:
 
     - name: 🧪 Run All Unit Tests with Coverage
       run: |
-        dotnet test CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
+        dotnet test tests/CoolLibraryTests/CoolLibraryUnitaryTests.csproj \
           --no-build \
           --configuration Release \
           --verbosity normal \
