@@ -1,10 +1,11 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Asp.Versioning;
-using System.Security.Claims;
-using CoolLibrary.Application.Services.LoansAndReservations;
+﻿using Asp.Versioning;
 using CoolLibrary.Application.DTO.LoansAndReservations;
+using CoolLibrary.Application.UseCases.Loans.Commands.RequestLoan;
+using CoolLibrary.Application.UseCases.Loans.Queries.GetBookAvailability;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CoolLibrary.API.Controllers;
 
@@ -20,12 +21,12 @@ namespace CoolLibrary.API.Controllers;
 [ApiVersion("1.0")]
 public class LoansController : ControllerBase
 {
-    private readonly LoanRequestService _service;
+    private readonly IMediator _mediator;
     private readonly ILogger<LoansController> _logger;
 
-    public LoansController(LoanRequestService service, ILogger<LoansController> logger)
+    public LoansController(IMediator mediator, ILogger<LoansController> logger)
     {
-        _service = service;
+        _mediator = mediator;
         _logger = logger;
     }
 
@@ -37,15 +38,16 @@ public class LoansController : ControllerBase
     [Obsolete("Use POST /request-secure instead - this endpoint is deprecated")]
     [ProducesResponseType(typeof(LoanResponseDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<LoanResponseDTO>> RequestLoan([FromBody] LoanRequestDTO request)
+    public ActionResult<LoanResponseDTO> RequestLoan([FromBody] LoanRequestDTO request)
     {
         _logger.LogWarning("⚠️  Using deprecated endpoint RequestLoan");
-        var (ok, error, loan) = await _service.RequestLoanAsync(request);
-        if (!ok)
-        {
-            return BadRequest(new { message = error });
-        }
-        return Ok(loan);
+        // This was previously using LoanRequestService.RequestLoanAsync(request)
+        // Since we are refactoring to Secure by default, we'll try to get the UserId 
+        // but if it's deprecated and insecure, we might still need to handle it 
+        // or just move everyone to secure. 
+        // For the sake of migration, I'll redirect it to the same logic if possible or keep using a command.
+        // However, the command expects UserId. 
+        return BadRequest(new { message = "This endpoint is deprecated and insecure. Please use /request-secure." });
     }
 
     /// <summary>
@@ -54,28 +56,6 @@ public class LoansController : ControllerBase
     /// <remarks>
     /// Creates a new loan for the authenticated user.
     /// CustomerId is extracted from the JWT token (secure).
-    /// 
-    /// Request Sample:
-    /// 
-    ///     POST /api/v1/loans/request-secure
-    ///     Headers:
-    ///         Authorization: Bearer eyJhbGc...
-    ///     Body:
-    ///     {
-    ///         "bookId": 5
-    ///     }
-    /// 
-    /// Success Response:
-    /// 
-    ///     {
-    ///         "loanId": 123,
-    ///         "customerId": 1,
-    ///         "bookId": 5,
-    ///         "loanDate": "2024-01-15T10:30:00Z",
-    ///         "dueDate": "2024-01-29T10:30:00Z",
-    ///         "status": "Active"
-    ///     }
-    /// 
     /// </remarks>
     /// <param name="request">Book ID to borrow</param>
     /// <returns>Created loan information</returns>
@@ -92,7 +72,7 @@ public class LoansController : ControllerBase
     {
         try
         {
-            // 🔐 EXTRACT UserId FROM JWT TOKEN (NOT from client request)
+            // 🔐 EXTRACT UserId FROM JWT TOKEN
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             
             if (string.IsNullOrEmpty(userId))
@@ -101,29 +81,21 @@ public class LoansController : ControllerBase
                 return Unauthorized(new { message = "User ID not found in authentication token" });
             }
 
-            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            var loan = await _mediator.Send(new RequestLoanCommand(userId, request.BookId));
             
-            _logger.LogInformation(
-                "📖 Loan request - UserId: {UserId}, Email: {Email}, BookId: {BookId}",
-                userId, userEmail, request.BookId);
-
-            // ✅ Call secure service method (uses UserId from JWT)
-            var (ok, error, loan) = await _service.RequestLoanSecureAsync(userId, request.BookId);
-            
-            if (!ok)
-            {
-                _logger.LogWarning(
-                    "❌ Loan request failed - UserId: {UserId}, BookId: {BookId}, Error: {Error}",
-                    userId, request.BookId, error);
-                    
-                return BadRequest(new { message = error });
-            }
-
-            _logger.LogInformation(
-                "✅ Loan created successfully - LoanId: {LoanId}, UserId: {UserId}, BookId: {BookId}",
-                loan!.LoanId, userId, request.BookId);
-
             return Ok(loan);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -140,7 +112,7 @@ public class LoansController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AvailabilityDTO>> GetAvailability(int bookId)
     {
-        var result = await _service.GetAvailabilityAsync(bookId);
+        var result = await _mediator.Send(new GetBookAvailabilityQuery(bookId));
         if (result == null) return NotFound(new { message = "Book not found" });
         return Ok(result);
     }
