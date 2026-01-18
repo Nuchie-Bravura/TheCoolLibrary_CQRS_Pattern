@@ -38,7 +38,7 @@ public class LoansController : ControllerBase
     [Obsolete("Use POST /request-secure instead - this endpoint is deprecated")]
     [ProducesResponseType(typeof(LoanResponseDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<LoanResponseDTO>> RequestLoan([FromBody] LoanRequestDTO request)
+    public ActionResult<LoanResponseDTO> RequestLoan([FromBody] LoanRequestDTO request)
     {
         _logger.LogWarning("⚠️  Using deprecated endpoint RequestLoan");
         // This was previously using LoanRequestService.RequestLoanAsync(request)
