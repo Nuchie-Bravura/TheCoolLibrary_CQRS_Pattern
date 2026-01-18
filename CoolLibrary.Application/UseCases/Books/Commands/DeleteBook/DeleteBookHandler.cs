@@ -1,34 +1,28 @@
-﻿
 using CoolLibrary.Domain.Contracts;
+using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CoolLibrary.Application.Services.Books
+namespace CoolLibrary.Application.UseCases.Books.Commands.DeleteBook
 {
-
-    public class DeleteBookService
+    public class DeleteBookHandler : IRequestHandler<DeleteBookCommand, bool>
     {
-
         private readonly IBooks _booksRepository;
         private readonly IArchiveStorage _archiveStorage;
-        private readonly ILogger<DeleteBookService> _logger;
+        private readonly ILogger<DeleteBookHandler> _logger;
 
-        public DeleteBookService(
+        public DeleteBookHandler(
             IBooks booksRepository,
             IArchiveStorage archiveStorage,
-            ILogger<DeleteBookService> logger)
+            ILogger<DeleteBookHandler> logger)
         {
             _booksRepository = booksRepository;
             _archiveStorage = archiveStorage;
             _logger = logger;
         }
 
-        public async Task<bool> SafeBookDeleteAsync(int bookId)
+        public async Task<bool> Handle(DeleteBookCommand request, CancellationToken cancellationToken)
         {
+            var bookId = request.BookId;
             try
             {
                 var book = await _booksRepository.GetByIdAsync(bookId);
@@ -47,6 +41,5 @@ namespace CoolLibrary.Application.Services.Books
                 throw;
             }
         }
-
     }
 }

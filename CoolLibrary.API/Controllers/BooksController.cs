@@ -1,10 +1,12 @@
 ﻿using Asp.Versioning;
 using CoolLibrary.Application.DTO.Book;
-using CoolLibrary.Application.Services.Books;
+using CoolLibrary.Application.UseCases.Books.Commands.CreateBook;
+using CoolLibrary.Application.UseCases.Books.Commands.DeleteBook;
+using CoolLibrary.Application.UseCases.Books.Queries.GetAllBooks;
+using CoolLibrary.Application.UseCases.Books.Queries.GetBookById;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-
 
 namespace CoolLibrary.API.Controllers;
 
@@ -20,15 +22,11 @@ namespace CoolLibrary.API.Controllers;
 [ApiVersion("1.0")]  // ← This controller belongs to API v1.0
 public class BooksController : ControllerBase
 {
-    private readonly CreateBookService _createBookService;
-    private readonly GetAllBooksService _getAllBooksService;    
-    private readonly DeleteBookService _deleteBookService;
+    private readonly IMediator _mediator;
 
-    public BooksController(  CreateBookService createBookService, GetAllBooksService getAllBooksService, DeleteBookService deleteBookService)
+    public BooksController(IMediator mediator)
     {
-        _getAllBooksService = getAllBooksService;
-        _deleteBookService = deleteBookService;
-        _createBookService = createBookService;
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -60,7 +58,7 @@ public class BooksController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<BookDTO>>> GetAll()
     {
-        var books = await _getAllBooksService.ExecuteAsync();
+        var books = await _mediator.Send(new GetAllBooksQuery());
         return Ok(books);
     }
 
@@ -78,7 +76,7 @@ public class BooksController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> GetById(int bookID)
     {
-         var book = await _getAllBooksService.GetByIdAsync(bookID);
+         var book = await _mediator.Send(new GetBookByIdQuery(bookID));
          return Ok(book);
     }
 
@@ -121,7 +119,7 @@ public class BooksController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<BookDTO>> CreateNewBookEntry([FromForm] CreateBookRequestDTO createBookRequestDTO)
     {
-        var createdBook = await _createBookService.ExecuteAsync(createBookRequestDTO);
+        var createdBook = await _mediator.Send(new CreateBookCommand(createBookRequestDTO));
         return CreatedAtAction(nameof(GetById), new { id = createdBook.BookId, version = "1.0" }, createdBook);
     }
 
@@ -143,7 +141,7 @@ public class BooksController : ControllerBase
 
     public async Task<IActionResult> DeleteBook(int bookId)
     {
-        await _deleteBookService.SafeBookDeleteAsync(bookId);
+        await _mediator.Send(new DeleteBookCommand(bookId));
         return NoContent();
     }
 

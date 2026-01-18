@@ -1,6 +1,6 @@
 ﻿using CoolLibrary.Application.Mappings;
 
-using CoolLibrary.Application.Services.Books;
+
 using CoolLibrary.Application.Services.LoansAndReservations;
 using CoolLibrary.Application.Services.Token;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,9 +17,7 @@ namespace CoolLibrary.Application.Extensions
             services.AddScoped<LoanRequestService>();
             services.AddScoped<TokenService>();
   
-            services.AddScoped<CreateBookService>();
-            services.AddScoped<GetAllBooksService>();
-            services.AddScoped<DeleteBookService>();
+
             //services.AddScoped<LoanApprovalService>();
             //services.AddScoped<ReservationService>();
             //services.AddScoped<ReturnLoanService>();
