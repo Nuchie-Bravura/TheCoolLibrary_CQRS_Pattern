@@ -1,5 +1,5 @@
 ﻿using CoolLibrary.Application.Mappings;
-using CoolLibrary.Application.Services.Authors;
+
 using CoolLibrary.Application.Services.Books;
 using CoolLibrary.Application.Services.LoansAndReservations;
 using CoolLibrary.Application.Services.Token;
@@ -16,9 +16,7 @@ namespace CoolLibrary.Application.Extensions
             // Application Services
             services.AddScoped<LoanRequestService>();
             services.AddScoped<TokenService>();
-            services.AddScoped<GetAllAuthorsService>();
-            services.AddScoped<CreateAuthorService>();
-            services.AddScoped<DeleteAuthorService>();  
+  
             services.AddScoped<CreateBookService>();
             services.AddScoped<GetAllBooksService>();
             services.AddScoped<DeleteBookService>();
@@ -27,6 +25,9 @@ namespace CoolLibrary.Application.Extensions
             //services.AddScoped<ReturnLoanService>();
             //services.AddScoped<GetUserLoansService>();
 
+
+            // MediatR
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ApplicationServiceExtensions).Assembly));
 
             // AutoMapper
             services.AddAutoMapper(typeof(MappingProfile).Assembly);

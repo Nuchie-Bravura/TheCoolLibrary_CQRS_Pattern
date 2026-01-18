@@ -1,41 +1,32 @@
-﻿using AutoMapper;
+using AutoMapper;
 using CoolLibrary.Application.DTO.Author;
-using CoolLibrary.Application.DTO.Book;
 using CoolLibrary.Application.Services.Cache;
 using CoolLibrary.Domain.Contracts;
+using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CoolLibrary.Application.Services.Authors
+namespace CoolLibrary.Application.UseCases.Authors.Queries.GetAllAuthors
 {
-    public class GetAllAuthorsService
+    public class GetAllAuthorsHandler : IRequestHandler<GetAllAuthorsQuery, IEnumerable<AuthorDTO>>
     {
-
         private readonly IAuthors _authorsRepository;
         private readonly IMapper _mapper;
-        private readonly ILogger<GetAllAuthorsService> _logger;
-        private readonly IBooks _booksRepository;
+        private readonly ILogger<GetAllAuthorsHandler> _logger;
         private readonly ICacheService _cacheService;
 
-        public GetAllAuthorsService(
-            IAuthors authorsRepository, 
-            IMapper mapper, 
-            ILogger<GetAllAuthorsService> logger, 
-            IBooks booksRepository,
+        public GetAllAuthorsHandler(
+            IAuthors authorsRepository,
+            IMapper mapper,
+            ILogger<GetAllAuthorsHandler> logger,
             ICacheService cacheService)
         {
             _authorsRepository = authorsRepository;
             _mapper = mapper;
             _logger = logger;
-            _booksRepository = booksRepository;
             _cacheService = cacheService;
         }
 
-        public async Task<IEnumerable<AuthorDTO>> ExecuteAsync()
+        public async Task<IEnumerable<AuthorDTO>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
         {
             const string cacheKey = "authors:all";
 
