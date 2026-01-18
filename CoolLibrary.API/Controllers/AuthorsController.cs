@@ -1,6 +1,9 @@
 ﻿using Asp.Versioning;
 using CoolLibrary.Application.DTO.Author;
-using CoolLibrary.Application.Services.Authors;
+using CoolLibrary.Application.UseCases.Authors.Commands.CreateAuthor;
+using CoolLibrary.Application.UseCases.Authors.Commands.DeleteAuthor;
+using CoolLibrary.Application.UseCases.Authors.Queries.GetAllAuthors;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,24 +15,17 @@ using Microsoft.AspNetCore.Mvc;
 [ApiVersion("1.0")]
 public class AuthorsController : ControllerBase
 {
-    private readonly CreateAuthorService _createAuthorService;
-    private readonly GetAllAuthorsService _getAllAuthorsService;
-    private readonly DeleteAuthorService _deleteAuthorService;
+    private readonly IMediator _mediator;
 
-    public AuthorsController(
-        CreateAuthorService createAuthorService,
-        GetAllAuthorsService getAllAuthorsService,
-        DeleteAuthorService deleteAuthorService)
+    public AuthorsController(IMediator mediator)
     {
-        _createAuthorService = createAuthorService;
-        _getAllAuthorsService = getAllAuthorsService;
-        _deleteAuthorService = deleteAuthorService;
+        _mediator = mediator;
     }
 
     [HttpGet("with-books")]
     public async Task<IActionResult> GetAllAuthorsWithBooks()
     {
-        var authors = await _getAllAuthorsService.ExecuteAsync();
+        var authors = await _mediator.Send(new GetAllAuthorsQuery());
         return Ok(authors);
     }
 
@@ -37,7 +33,7 @@ public class AuthorsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AddNewAuthor([FromForm] CreateAuthorRequestDTO createAuthorRequestDTO)
     {
-        var createdAuthor = await _createAuthorService.ExecuteAsync(createAuthorRequestDTO);
+        var createdAuthor = await _mediator.Send(new CreateAuthorCommand(createAuthorRequestDTO));
         return CreatedAtAction(nameof(GetAllAuthorsWithBooks), new { id = createdAuthor.AuthorId, version = "1.0" }, createdAuthor);
     }
 
@@ -45,7 +41,7 @@ public class AuthorsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteAuthor(int authorId)
     {
-        var result = await _deleteAuthorService.SafeAuthorDeleteAsync(authorId);
+        var result = await _mediator.Send(new DeleteAuthorCommand(authorId));
         if (!result) return NotFound($"Author with ID {authorId} not found.");
         return NoContent();
     }

@@ -1,4 +1,4 @@
-﻿using CoolLibrary.Application.Services.Authors;
+﻿
 using CoolLibrary.Domain.Contracts;
 using Microsoft.Extensions.Logging;
 using System;

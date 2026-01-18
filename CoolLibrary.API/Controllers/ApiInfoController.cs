@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace CoolLibrary.API.Controllers;
 
 /// <summary>
+/// API Information Controller
+/// </summary>
 [ApiExplorerSettings(GroupName = "v1")]
 public class ApiInfoController : ControllerBase
 {
