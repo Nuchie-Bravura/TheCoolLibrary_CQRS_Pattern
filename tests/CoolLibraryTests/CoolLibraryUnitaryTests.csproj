@@ -23,8 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CoolLibrary.Application\CoolLibrary.Application.csproj" />
-    <ProjectReference Include="..\CoolLibrary.Domain\CoolLibrary.Domain.csproj" />
+    <ProjectReference Include="..\..\src\CoolLibrary.Application\CoolLibrary.Application.csproj" />
+    <ProjectReference Include="..\..\src\CoolLibrary.Domain\CoolLibrary.Domain.csproj" />
   </ItemGroup>
 
 </Project>
