@@ -1,21 +1,20 @@
-﻿using AutoMapper;
-using CoolLibrary.Application.DTO.Author;
+using AutoMapper;
 using CoolLibrary.Application.DTO.Book;
 using CoolLibrary.Domain.Contracts;
-using CoolLibrary.Domain.Entities;
+using MediatR;
 using Microsoft.Extensions.Logging;
 
-
-namespace CoolLibrary.Application.Services.Books
+namespace CoolLibrary.Application.UseCases.Books.Commands.CreateBook
 {
-    public class CreateBookService
+    public class CreateBookHandler : IRequestHandler<CreateBookCommand, CreateBookResponseDTO>
     {
         private readonly IBooks _booksRepository;
         private readonly IAuthors _authorsRepository;
         private readonly IArchiveStorage _archiveStorage;
         private readonly IMapper _mapper;
-        private readonly ILogger<CreateBookService> _logger;
-        public CreateBookService(IBooks booksRepository, IAuthors authorsRepository, IArchiveStorage archiveStorage, IMapper mapper, ILogger<CreateBookService> logger)
+        private readonly ILogger<CreateBookHandler> _logger;
+
+        public CreateBookHandler(IBooks booksRepository, IAuthors authorsRepository, IArchiveStorage archiveStorage, IMapper mapper, ILogger<CreateBookHandler> logger)
         {
             _booksRepository = booksRepository;
             _authorsRepository = authorsRepository;
@@ -24,9 +23,9 @@ namespace CoolLibrary.Application.Services.Books
             _logger = logger;
         }
 
-
-        public async Task<CreateBookResponseDTO> ExecuteAsync(CreateBookRequestDTO createBookRequestDTO)
+        public async Task<CreateBookResponseDTO> Handle(CreateBookCommand request, CancellationToken cancellationToken)
         {
+            var createBookRequestDTO = request.CreateBookRequestDTO;
             try
             {
                 // Validate copy counts
@@ -53,12 +52,12 @@ namespace CoolLibrary.Application.Services.Books
                     }
                 }
                 else
-                { 
+                {
                     throw new ArgumentException("At least one author must be specified.");
                 }
 
                 // Map DTO to entity (AutoMapper now handles BookAuthors creation)
-                var bookEntity = _mapper.Map<Domain.Entities.Book>(createBookRequestDTO);
+                var bookEntity = _mapper.Map<CoolLibrary.Domain.Entities.Book>(createBookRequestDTO);
 
                 // If cover image is provided, upload it to Azure storage
                 if (createBookRequestDTO.PhotoFile != null)
@@ -73,7 +72,7 @@ namespace CoolLibrary.Application.Services.Books
 
                 var createdBook = await _booksRepository.InsertAsync(bookEntity);
 
-                return  _mapper.Map<CreateBookResponseDTO>(createdBook);
+                return _mapper.Map<CreateBookResponseDTO>(createdBook);
             }
             catch (Exception ex)
             {
@@ -81,6 +80,5 @@ namespace CoolLibrary.Application.Services.Books
                 throw new ApplicationException($"An error occurred while creating the book: {ex.InnerException?.Message ?? ex.Message}", ex);
             }
         }
-       
     }
 }

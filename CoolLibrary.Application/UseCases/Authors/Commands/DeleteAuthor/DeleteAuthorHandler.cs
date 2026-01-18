@@ -1,4 +1,4 @@
-using CoolLibrary.Application.Services.Books;
+using CoolLibrary.Application.UseCases.Books.Commands.DeleteBook;
 using CoolLibrary.Domain.Contracts;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -9,20 +9,20 @@ namespace CoolLibrary.Application.UseCases.Authors.Commands.DeleteAuthor
     {
         private readonly IAuthors _authorsRepository;
         private readonly IBooks _booksRepository;
-        private readonly DeleteBookService _deleteBookService;
+        private readonly IMediator _mediator;
         private readonly IArchiveStorage _archiveStorage;
         private readonly ILogger<DeleteAuthorHandler> _logger;
 
         public DeleteAuthorHandler(
             IAuthors authorsRepository,
             IBooks booksRepository,
-            DeleteBookService deleteBookService,
+            IMediator mediator,
             IArchiveStorage archiveStorage,
             ILogger<DeleteAuthorHandler> logger)
         {
             _authorsRepository = authorsRepository;
             _booksRepository = booksRepository;
-            _deleteBookService = deleteBookService;
+            _mediator = mediator;
             _archiveStorage = archiveStorage;
             _logger = logger;
         }
@@ -39,7 +39,7 @@ namespace CoolLibrary.Application.UseCases.Authors.Commands.DeleteAuthor
                 var books = await _booksRepository.GetByAuthorAsync(authorId);
                 foreach (var book in books)
                 {
-                    await _deleteBookService.SafeBookDeleteAsync(book.BookId);
+                    await _mediator.Send(new DeleteBookCommand(book.BookId));
                 }
 
                 if (!string.IsNullOrEmpty(author.PhotoURL))
