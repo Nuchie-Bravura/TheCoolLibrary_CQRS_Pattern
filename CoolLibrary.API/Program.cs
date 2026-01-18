@@ -1,7 +1,7 @@
 ﻿using CoolLibrary.API;
 using CoolLibrary.API.Extensions;
 using CoolLibrary.Application.Extensions;
-using CoolLibrary.Application.GraphQL.Queries;
+
 using CoolLibrary.Infrastructure.Data;
 using CoolLibrary.Infrastructure.Extensions;
 
@@ -25,19 +25,7 @@ builder.Services.AddInfrastructureServices(connectionString, builder.Configurati
 // =====================
 builder.Services.AddApplicationServices();
 
-// =====================
-// 4. GraphQL Configuration
-// =====================
-builder.Services
-    .AddGraphQLServer()
-    .AddQueryType(d => d.Name("Query"))
-    .AddTypeExtension<AuthorQueries>()
-    .AddTypeExtension<CustomerQueries>()
-    .AddTypeExtension<BookQueries>()
-    .AddTypeExtension<GenreQueries>()
-    .AddProjections()
-    .AddFiltering()
-    .AddSorting();
+
 
 // =====================
 // 5. Azure Key Vault (opcional)
@@ -110,10 +98,7 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// =====================
-// 9. GraphQL Endpoint
-// =====================
-app.MapGraphQL("/graphql");
+
 
 // Health checks + Controllers
 app.MapHealthChecks("/healthz");

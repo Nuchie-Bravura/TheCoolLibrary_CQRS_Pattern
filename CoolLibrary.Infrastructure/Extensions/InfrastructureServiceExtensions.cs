@@ -1,8 +1,8 @@
-﻿using CoolLibrary.Application.GraphQL.Abstractions;
+﻿
 using CoolLibrary.Domain.Contracts;
 using CoolLibrary.Domain.Entities;
 using CoolLibrary.Infrastructure.Data;
-using CoolLibrary.Infrastructure.GraphQL;
+
 using CoolLibrary.Infrastructure.Repositories;
 using CoolLibrary.Infrastructure.Services;
 using CoolLibrary.Application.Services.Cache;
@@ -68,7 +68,7 @@ namespace CoolLibrary.Infrastructure.Extensions
             services.AddScoped<IArchiveStorage, AzureArchiveStorageRepository>();
 
             // GraphQL Queryable Provider
-            services.AddScoped<IQueryableProvider, EfCoreQueryableProvider>();
+
 
             return services;
         }
