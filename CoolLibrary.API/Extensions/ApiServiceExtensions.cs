@@ -47,18 +47,9 @@ namespace CoolLibrary.API.Extensions
                         
                         This is the RESTful API for the CoolLibrary system.
                         
-                        ### 🚀 Alternative: GraphQL API
-                        
-                        **GraphQL Endpoint:** `/graphql`
-                        
-                        For flexible queries and real-time data fetching, you can use our GraphQL API:
-                        - **GraphQL Playground:** [https://localhost:7182/graphql](https://localhost:7182/graphql)
-                        - **Documentation:** Interactive schema explorer available in the playground
-                        - **Single endpoint:** All queries through POST to `/graphql`
-                        
                         ### 🔐 Authentication
                         
-                        Both REST and GraphQL APIs use JWT Bearer tokens for authentication.
+                        The API uses JWT Bearer tokens for authentication.
                     ",
                     Contact = new OpenApiContact
                     {
