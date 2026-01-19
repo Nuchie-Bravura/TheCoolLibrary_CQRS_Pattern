@@ -71,6 +71,7 @@ if (!app.Environment.IsEnvironment("Testing"))
 // =====================
 
 // Archivos estáticos (HTML de bienvenida)
+app.UseDefaultFiles(); // Esto permite que index.html se sirva en la raíz
 app.UseStaticFiles();
 
 if (app.Environment.IsDevelopment())
