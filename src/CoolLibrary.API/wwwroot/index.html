@@ -78,10 +78,6 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
         
-        .button.secondary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        
         .features {
             list-style: none;
             margin-top: 15px;
@@ -101,17 +97,6 @@
             font-weight: bold;
         }
         
-        .code-block {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-            overflow-x: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-        
         .badge {
             display: inline-block;
             background: #667eea;
@@ -127,60 +112,24 @@
 <body>
     <div class="container">
         <h1>📚 CoolLibrary API</h1>
-        <p class="subtitle">Choose your preferred API interface</p>
+        <p class="subtitle">RESTful API with complete documentation</p>
         
         <!-- REST API Section -->
         <div class="api-section">
             <h2>
-                <span class="icon">🔷</span>
-                REST API
-                <span class="badge">Traditional</span>
+                <span class="icon">📄</span>
+                API Documentation
+                <span class="badge">Swagger</span>
             </h2>
-            <p>Standard RESTful endpoints with Swagger documentation</p>
+            <p>Explore and test all API endpoints with interactive Swagger/OpenAPI documentation</p>
             <ul class="features">
-                <li>Multiple endpoints for different resources</li>
-                <li>Standard HTTP methods (GET, POST, PUT, DELETE)</li>
-                <li>Complete Swagger/OpenAPI documentation</li>
-                <li>Easy to understand and use</li>
+                <li>Complete RESTful API documentation</li>
+                <li>Interactive endpoint testing</li>
+                <li>Request/Response examples</li>
+                <li>Authentication support</li>
+                <li>Schema definitions</li>
             </ul>
-            <a href="/swagger" class="button">📄 Open Swagger Docs</a>
-            <a href="/api/info" class="button secondary">ℹ️ API Info</a>
-        </div>
-        
-        <!-- GraphQL Section -->
-        <div class="api-section">
-            <h2>
-                <span class="icon">⚡</span>
-                GraphQL API
-                <span class="badge">Flexible</span>
-            </h2>
-            <p>Query exactly what you need with our GraphQL endpoint</p>
-            <ul class="features">
-                <li>Single endpoint for all queries</li>
-                <li>Request only the data you need</li>
-                <li>Interactive schema explorer (Banana Cake Pop)</li>
-                <li>Real-time validation and autocomplete</li>
-            </ul>
-            <a href="/graphql" class="button">🍌 Open GraphQL Playground</a>
-            
-            <div class="code-block">
-Example Query:
-
-{
-  authors {
-    firstName
-    lastName
-    bookAuthors {
-      book {
-        title
-        bookGenres {
-          genre { name }
-        }
-      }
-    }
-  }
-}
-            </div>
+            <a href="/swagger" class="button">📄 Open Swagger Documentation</a>
         </div>
         
         <!-- Health Check -->
