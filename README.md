@@ -81,7 +81,7 @@ Domain has no dependencies.
 - Extension methods to keep Program.cs clean
 - Responsibility separation across all layers
 
-### Phase 2 — **CQRS Version** (coming soon)
+### Phase 2 — **CQRS Version** (Cache and Toekn Services not migrated to CQRS to make it easier and because it is not needed for meeting the criteria)
 - Full CQRS rewrite
 - Commands and Queries
 - Mediatr
@@ -155,7 +155,7 @@ Domain has no dependencies.
 - Swashbuckle (Swagger/OpenAPI)
 - Redis RateLimit & Cache
 - Moq & FluentAssertions &  AAA (Arrange-Act-Assert) pattern
-- GraphQL {just query} Hot chocolate & banana cake
+- GraphQL {just query} Hot chocolate & banana cake  {only on Repository Pattern}
 
 ### **Database**
 - SQL Server
