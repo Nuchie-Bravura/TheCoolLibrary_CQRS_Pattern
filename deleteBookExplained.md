@@ -88,6 +88,7 @@ public static IServiceCollection AddApplicationServices(this IServiceCollection 
 }
 
 
+
 El controlador depende de los servicios de la capa de aplicación, y estos servicios a su vez dependen de los repositorios, que implementan las interfaces definidas en la capa de dominio.
 
 Por ejemplo, el servicio DeleteBookService recibe los repositorios e infraestructuras necesarias:
@@ -104,14 +105,10 @@ public DeleteBookService(
 
 
 Cuando quiero un recurso para borrar un libro, creo el servicio DeleteBookService, lo registro en Program.cs y luego lo inyecto en el controlador.
-
 En este servicio se aplica toda la lógica de negocio:
-
-Encontrar el libro por su Id.
-
-Ver si tiene una imagen guardada en Azure Blob Storage y borrarla.
-
-Logear todo el proceso.
+1- Encontrar el libro por su Id.
+2- Ver si tiene una imagen guardada en Azure Blob Storage y borrarla.
+3- Logear todo el proceso.
 
 Por tanto, el servicio es donde vive la lógica de negocio, y donde se usan los repositorios necesarios.
 
@@ -135,6 +132,7 @@ public static IServiceCollection AddApplicationServices(this IServiceCollection 
 
     return services;
 }
+
 
 
 En el controlador desaparecen los servicios de aplicación y solo queda el IMediator:
