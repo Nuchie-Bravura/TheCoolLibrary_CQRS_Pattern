@@ -81,7 +81,7 @@ Domain has no dependencies.
 - Extension methods to keep Program.cs clean
 - Responsibility separation across all layers
 
-### Phase 2 — **CQRS Version** (Cache and Toekn Services not migrated to CQRS to make it easier and because it is not needed for meeting the criteria)
+### Phase 2 — **CQRS Version** 
 - Full CQRS rewrite
 - Commands and Queries
 - Mediatr
