@@ -37,6 +37,7 @@ namespace CoolLibrary.Application.UseCases.Loans.Commands.RequestLoan
                 var customer = await _customersRepository.GetCustomerByUserIdAsync(userId);
                 if (customer == null)
                 {
+                    _logger.LogWarning("Loan request failed: Customer profile not found for user {UserId}", userId);
                     throw new KeyNotFoundException("Customer profile not found for authenticated user.");
                 }
 
@@ -44,11 +45,13 @@ namespace CoolLibrary.Application.UseCases.Loans.Commands.RequestLoan
                 var book = await _booksRepository.GetByIdAsync(bookId);
                 if (book == null)
                 {
+                    _logger.LogWarning("Loan request failed: Book {BookId} not found", bookId);
                     throw new ArgumentException("Book not found.");
                 }
 
                 if (book.AvailableCopies <= 0)
                 {
+                    _logger.LogWarning("Loan request failed: Book {BookId} not available (0 copies)", bookId);
                     throw new InvalidOperationException("Book is not available for loan.");
                 }
 
@@ -56,6 +59,8 @@ namespace CoolLibrary.Application.UseCases.Loans.Commands.RequestLoan
                 var activeLoanCount = await _loansRepository.GetActiveLoanCountForCustomerAsync(customer.CustomerId);
                 if (activeLoanCount >= 3)
                 {
+                    _logger.LogWarning("Loan request failed: Customer {CustomerId} has reached max loans limit ({ActiveLoans}/3)", 
+                        customer.CustomerId, activeLoanCount);
                     throw new InvalidOperationException("User has reached maximum active loans limit (3).");
                 }
 
@@ -81,6 +86,9 @@ namespace CoolLibrary.Application.UseCases.Loans.Commands.RequestLoan
                 // 5. Update Book Copies
                 await _booksRepository.UpdateAvailableCopiesAsync(book.BookId, book.AvailableCopies - 1);
 
+                _logger.LogInformation("? Loan created successfully: LoanId {LoanId}, Customer {CustomerId}, Book {BookId}, Due {DueDate}", 
+                    createdLoan.LoanId, customer.CustomerId, book.BookId, due);
+
                 return new LoanResponseDTO
                 {
                     LoanId = createdLoan.LoanId,
@@ -93,7 +101,7 @@ namespace CoolLibrary.Application.UseCases.Loans.Commands.RequestLoan
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing loan request for User {UserId} and Book {BookId}", userId, bookId);
+                _logger.LogError(ex, "? Error processing loan request for User {UserId} and Book {BookId}", userId, bookId);
                 throw;
             }
         }

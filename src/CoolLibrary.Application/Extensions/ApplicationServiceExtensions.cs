@@ -1,7 +1,4 @@
 ﻿using CoolLibrary.Application.Mappings;
-
-
-
 using CoolLibrary.Application.Services.Token;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,12 +12,6 @@ namespace CoolLibrary.Application.Extensions
         {
             // Application Services
             services.AddScoped<TokenService>();
-  
-
-            //services.AddScoped<LoanApprovalService>();
-            //services.AddScoped<ReservationService>();
-            //services.AddScoped<ReturnLoanService>();
-            //services.AddScoped<GetUserLoansService>();
 
 
             // MediatR
