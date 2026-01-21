@@ -1,0 +1,219 @@
+````markdown
+# 🔐 JWT Authentication & CQRS en CoolLibrary
+
+## AuthController y la Capa de Aplicación
+
+Tengo el controlador `AuthController` en la capa **API** y en él se inyectan varios servicios que pertenecen a la **capa Application**.
+
+En el patrón repositorio clásico, registro mis servicios así:
+
+```csharp
+public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+{
+    // Application Services
+    services.AddScoped<LoanRequestService>();
+    services.AddScoped<TokenService>();
+    services.AddScoped<GetAllAuthorsService>();
+    services.AddScoped<CreateAuthorService>();
+    services.AddScoped<DeleteAuthorService>();
+    services.AddScoped<CreateBookService>();
+    services.AddScoped<GetAllBooksService>();
+    services.AddScoped<DeleteBookService>();
+    services.AddScoped<LoanApprovalService>();
+    services.AddScoped<ReservationService>();
+    services.AddScoped<ReturnLoanService>();
+    services.AddScoped<GetUserLoansService>();
+
+    // AutoMapper
+    services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
+    return services;
+}
+````
+
+---
+
+## 📦 Paquetes NuGet utilizados
+
+He tenido que descargar varios paquetes NuGet:
+
+* ✅ **Microsoft.AspNetCore.Authentication.JwtBearer v9.0.10**
+  → Middleware para validar tokens JWT en las peticiones HTTP
+
+* ✅ **Microsoft.AspNetCore.Identity.EntityFrameworkCore v9.0.10**
+  → Identity para gestionar usuarios, roles y contraseñas con Entity Framework
+
+* ✅ **System.IdentityModel.Tokens.Jwt v8.14.0**
+  → Para crear y manipular tokens JWT
+
+* ✅ **Microsoft.AspNetCore.Identity.EntityFrameworkCore v9.0.10**
+  → Para acceder a `ApplicationUser`
+
+---
+
+## 🔄 Flujo de Autenticación
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  1. REGISTRO                                                │
+│  POST /api/v1/auth/register                                 │
+│  → Crea ApplicationUser + Customer                          │
+│  → Asigna rol "User"                                        │
+└─────────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────────┐
+│  2. LOGIN                                                   │
+│  POST /api/v1/auth/login                                    │
+│  → Verifica email + password                                │
+│  → Genera JWT token (TokenService)                          │
+│  → Retorna: { token, expiresAt, email, roles }              │
+└─────────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────────┐
+│  3. PETICIONES AUTENTICADAS                                 │
+│  GET /api/v1/authors/with-books                             │
+│  Header: Authorization: Bearer <token>                      │
+│  → Middleware valida token automáticamente                  │
+│  → User.Claims contiene info del usuario                    │
+└─────────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────────┐
+│  4. RENOVAR TOKEN                                           │
+│  POST /api/v1/auth/renewToken                               │
+│  → Genera nuevo token con la misma info                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🧩 Patrón Repositorio
+
+En el patrón repositorio:
+
+* El controlador `AuthController` (capa API) inyecta **servicios de la capa Application**.
+* Estos servicios inyectan **repositorios**.
+* Los repositorios implementan **interfaces definidas en la capa Domain**.
+* En `Program.cs`, desde la capa Infrastructure, se decide qué implementación concreta usar cuando se pide una interfaz.
+
+---
+
+## 🧪 Login tradicional (`/api/v1/auth/login`)
+
+El controlador recibe un DTO y hace varios pasos:
+
+1. Con `UserManager` (Identity) busca el usuario por email.
+   → Si no existe, error.
+2. Comprueba la contraseña.
+3. Genera el token usando `TokenService`:
+
+```csharp
+var token = _tokenService.GenerateJwtToken(user, roles);
+var expiresAt = _tokenService.GetTokenExpiration();
+```
+
+4. Logea el evento.
+5. Retorna el DTO de respuesta.
+
+Es decir, el controlador hace **muchas cosas**.
+
+---
+
+## 🚀 ¿Cómo sería esto en CQRS?
+
+Separando comandos y queries:
+
+```
+CoolLibrary.Application/
+├── Features/
+│   └── Authentication/
+│       ├── Commands/
+│       │   ├── Register/
+│       │   │   ├── RegisterCommand.cs
+│       │   │   ├── RegisterCommandHandler.cs
+│       │   │   └── RegisterCommandValidator.cs
+│       │   └── RenewToken/
+│       │       ├── RenewTokenCommand.cs
+│       │       └── RenewTokenCommandHandler.cs
+│       │
+│       └── Queries/
+│           └── Login/
+│               ├── LoginQuery.cs
+│               ├── LoginQueryHandler.cs
+│               └── LoginQueryValidator.cs
+│
+└── Services/
+    └── Token/
+        └── TokenService.cs
+```
+
+### 📌 Conclusión: Login es una QUERY porque
+
+* ❌ No modifica datos de negocio en la BD.
+* ✅ Retorna información (token, roles, expiración).
+* 🟡 El logging es un side effect técnico, no de negocio.
+
+---
+
+## 🎯 Controlador con MediatR
+
+Ahora el controlador solo inyecta `IMediator`:
+
+```csharp
+try
+{
+    var result = await _mediator.Send(new LoginQuery(loginDto));
+    return Ok(result);
+}
+catch (UnauthorizedAccessException ex)
+{
+    return Unauthorized(new { message = ex.Message });
+}
+```
+
+Cuando se manda el `LoginQuery`, MediatR:
+
+* Localiza el `LoginQueryHandler`.
+* Ejecuta su método `Handle`.
+* Dentro del handler está exactamente la misma lógica que antes estaba en el servicio.
+
+El `TokenService` se mantiene, porque es un servicio técnico de infraestructura de seguridad, no de negocio.
+
+---
+
+## 🧩 Registro de servicios en CQRS
+
+Ahora ya no se registran servicios de negocio directamente:
+
+```csharp
+public static class ApplicationServiceExtensions
+{
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    {
+        // Servicios técnicos
+        services.AddScoped<TokenService>();
+
+        // MediatR
+        services.AddMediatR(cfg =>
+            cfg.RegisterServicesFromAssembly(typeof(ApplicationServiceExtensions).Assembly));
+
+        // AutoMapper
+        services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
+        return services;
+    }
+}
+```
+
+---
+
+## 🧠 Resumen corto para el repo
+
+> Antes: el controlador llamaba directamente a servicios de aplicación que hacían toda la lógica.
+>
+> Con CQRS:
+>
+> * El controlador solo habla con **MediatR**.
+> * Cada caso de uso es un **Command** o una **Query**.
+> * La lógica vive en los **Handlers**.
+> * Los servicios técnicos como `TokenService` siguen existiendo.
+> * El código queda más limpio, desacoplado y alineado con arquitectura limpia.
