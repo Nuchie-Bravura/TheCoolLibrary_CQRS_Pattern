@@ -67,8 +67,6 @@ namespace CoolLibrary.Infrastructure.Extensions
             services.AddScoped<ILoans, LoansRepository>();
             services.AddScoped<IArchiveStorage, AzureArchiveStorageRepository>();
 
-            // GraphQL Queryable Provider
-
 
             return services;
         }
