@@ -31,6 +31,7 @@ namespace CoolLibrary.Application.UseCases.Customers.Commands.UpdateCustomer
             var customerEntity = await _customersRepository.GetByIdAsync(customerId);
             if (customerEntity == null)
             {
+                _logger.LogWarning("Update failed: Customer with ID {CustomerId} not found", customerId);
                 return null;
             }
 
@@ -40,19 +41,14 @@ namespace CoolLibrary.Application.UseCases.Customers.Commands.UpdateCustomer
 
             if (!modelState.IsValid)
             {
-                 // In a real Clean Architecture, we might throw a ValidationException here.
-                 // For now, we will return null or throw depending on preference. 
-                 // But since the controller needs the ModelState errors, passing ModelState down is one way.
-                 // However, throwing an exception with errors is better. 
-                 // Or we could return a result object. 
-                 // For simplicity in this migration, we'll assume the controller checks ModelState *after* the command?
-                 // No, apply happens here.
-                 // If ModelState is invalid, we throw.
+                 _logger.LogWarning("Update failed: Invalid patch data for customer {CustomerId}", customerId);
                  throw new ArgumentException("Invalid state after patch");
             }
 
             _mapper.Map(customerToPatch, customerEntity);
             await _customersRepository.UpdateAsync(customerEntity);
+
+            _logger.LogInformation("Customer with ID {CustomerId} updated successfully", customerId);
 
             return _mapper.Map<CustomerDTO>(customerEntity);
         }

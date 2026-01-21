@@ -12,6 +12,7 @@ namespace CoolLibrary.API.Controllers;
 /// <summary>
 /// Loan operations management
 /// Accessible to authenticated users with User or Admin role
+/// All business logic and logging is delegated to handlers (CQRS pattern)
 /// </summary>
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -22,12 +23,10 @@ namespace CoolLibrary.API.Controllers;
 public class LoansController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly ILogger<LoansController> _logger;
 
-    public LoansController(IMediator mediator, ILogger<LoansController> logger)
+    public LoansController(IMediator mediator)
     {
         _mediator = mediator;
-        _logger = logger;
     }
 
     /// <summary>
@@ -40,13 +39,6 @@ public class LoansController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<LoanResponseDTO> RequestLoan([FromBody] LoanRequestDTO request)
     {
-        _logger.LogWarning("⚠️  Using deprecated endpoint RequestLoan");
-        // This was previously using LoanRequestService.RequestLoanAsync(request)
-        // Since we are refactoring to Secure by default, we'll try to get the UserId 
-        // but if it's deprecated and insecure, we might still need to handle it 
-        // or just move everyone to secure. 
-        // For the sake of migration, I'll redirect it to the same logic if possible or keep using a command.
-        // However, the command expects UserId. 
         return BadRequest(new { message = "This endpoint is deprecated and insecure. Please use /request-secure." });
     }
 
@@ -72,12 +64,11 @@ public class LoansController : ControllerBase
     {
         try
         {
-            // 🔐 EXTRACT UserId FROM JWT TOKEN
+            // 🔐 Extract UserId from JWT token
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             
             if (string.IsNullOrEmpty(userId))
             {
-                _logger.LogWarning("⚠️  No user ID found in JWT token");
                 return Unauthorized(new { message = "User ID not found in authentication token" });
             }
 
@@ -96,11 +87,6 @@ public class LoansController : ControllerBase
         catch (InvalidOperationException ex)
         {
             return BadRequest(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "❌ Unexpected error creating loan");
-            return StatusCode(500, new { message = "An error occurred while processing the loan request" });
         }
     }
 
