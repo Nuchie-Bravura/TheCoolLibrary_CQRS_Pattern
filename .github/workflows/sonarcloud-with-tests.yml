@@ -55,10 +55,16 @@ jobs:
           .\.sonar\scanner\dotnet-sonarscanner begin `
             /k:"Nuchie-Bravura_TheCoolLibrary_CQRS_Pattern" `
             /o:"nuchie-bravura" `
-            /d:sonar.token="${{ secrets.LIBRARYCQRS }}" `
+            /d:sonar.token="$env:SONAR_TOKEN" `
             /d:sonar.host.url="https://sonarcloud.io" `
             /d:sonar.cs.vscoveragexml.reportsPaths="coverage.xml" `
             /d:sonar.exclusions="**/obj/**,**/bin/**,**/Migrations/**,**/*.Designer.cs,**/wwwroot/**,**/AssemblyInfo.cs" `
             /d:sonar.coverage.exclusions="**/Migrations/**,**/Program.cs,**/AssemblyInfo.cs,**/*Tests/**,**/*Test.cs,**/GlobalUsings.g.cs" `
             /d:sonar.cpd.exclusions="**/Migrations/**" `
             /d:sonar.verbose=true
+          
+          dotnet build --configuration Release --no-restore
+          
+          dotnet-coverage collect "dotnet test --configuration Release --no-build --verbosity normal" -f xml -o "coverage.xml"
+          
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="$env:SONAR_TOKEN"
