@@ -9,6 +9,7 @@ using Xunit;
 
 namespace CoolLibraryIntegrationTests.Controllers;
 
+[Collection("Sequential")]
 public class BooksControllerIntegrationTests : IClassFixture<CoolLibraryWebApplicationFactory>
 {
     private readonly HttpClient _httpClient;
